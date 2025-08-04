@@ -44,10 +44,49 @@ jobs:
             fi
             echo "Manual workers selected: $WORKERS"
           else
-            # Auto-detectar cambios
+            # Auto-detectar cambios inline
             echo "🔍 Auto-detecting changed workers..."
-            WORKERS=$(node .github/scripts/detect-changed-workers.js)
-            echo "Auto-detected workers: $WORKERS"
+            
+            # Obtener archivos cambiados
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+            echo "📁 Changed files:"
+            echo "$CHANGED_FILES"
+            
+            # Listar todos los workers
+            ALL_WORKERS=$(ls apps/)
+            echo "🔍 All workers: $ALL_WORKERS"
+            
+            # Detectar workers afectados
+            AFFECTED_WORKERS=""
+            
+            for file in $CHANGED_FILES; do
+              echo "📝 Checking: $file"
+              
+              # Cambio directo en worker
+              if [[ $file == apps/*/* ]]; then
+                WORKER=$(echo $file | cut -d'/' -f2)
+                echo "  ✅ Direct change in: $WORKER"
+                if [[ ! $AFFECTED_WORKERS =~ $WORKER ]]; then
+                  AFFECTED_WORKERS="$AFFECTED_WORKERS $WORKER"
+                fi
+              fi
+              
+              # Cambio en packages compartidos
+              if [[ $file == packages/shared/* ]] || [[ $file == packages/types/* ]] || [[ $file == packages/auth/* ]] || [[ $file == packages/api/* ]] || [[ $file == packages/notifications/* ]]; then
+                echo "  🔄 Shared package change, affecting all workers"
+                AFFECTED_WORKERS="$ALL_WORKERS"
+                break
+              fi
+            done
+            
+            # Convertir a JSON array
+            if [ -z "$AFFECTED_WORKERS" ]; then
+              WORKERS="[]"
+            else
+              WORKERS=$(echo $AFFECTED_WORKERS | tr ' ' '\n' | sort -u | jq -R -s -c 'split("\n")[:-1]')
+            fi
+            
+            echo "🚀 Workers to deploy: $WORKERS"
           fi
 
           echo "workers=$WORKERS" >> $GITHUB_OUTPUT
@@ -69,6 +108,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 8
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
