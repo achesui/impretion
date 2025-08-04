@@ -1,6 +1,6 @@
 # .github/workflows/deploy-dashboard.yml
 
-name: Deploy Dashboard Worker
+name: Worker Deployment
 
 on:
   push:
@@ -33,7 +33,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Deploy with Turborepo
-        run: pnpm turbo run deploy --filter=@worker/dashboard
+        run: pnpm turbo run deploy --filter=@worker/core-service
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
