@@ -1,0 +1,27 @@
+{
+  "name": "impretion",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types",
+    "dev-chain": "node tools/dev-runner/index.js",
+    "dev": "node tools/dev/index.js"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.8.19",
+    "prettier": "3.6.2",
+    "turbo": "2.5.5",
+    "typescript": "5.8.3",
+    "vitest": "~3.2.0",
+    "wrangler": "4.27.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "hono": "4.8.12"
+  }
+}

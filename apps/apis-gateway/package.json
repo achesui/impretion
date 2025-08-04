@@ -1,0 +1,12 @@
+{
+  "name": "@worker/apis-gateway",
+  "scripts": {
+    "dev": "wrangler dev --port 3001 --persist-to=../../shared-workers-data",
+    "deploy": "wrangler deploy --minify",
+    "cf-typegen": "wrangler types",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@base/shared-types": "workspace:*"
+  }
+}

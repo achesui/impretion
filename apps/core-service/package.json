@@ -1,0 +1,39 @@
+{
+	"name": "@worker/core-service",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev --port 3003 --persist-to=../../shared-workers-data",
+		"start": "wrangler dev",
+		"test": "vitest",
+		"cf-typegen": "wrangler types",
+		"build:types": "tsc -p tsconfig.types.json",
+		"db:migrate:pg:dev": "tsx ./postgres-database/scripts/migrate.ts dev",
+		"db:migrate:pg:prod": "tsx ./postgres-database/scripts/migrate.ts prod",
+		"db:seed:pg:dev": "tsx ./postgres-database/scripts/seed.ts dev",
+		"db:seed:pg:prod": "tsx ./postgres-database/scripts/seed.ts prod",
+		"db:studio:pg:dev": "drizzle-kit studio --config=./drizzle.config.postgres.dev.ts",
+		"db:studio:pg:prod": "drizzle-kit studio --config=./drizzle.config.postgres.prod.ts",
+		"db:generate:pg": "drizzle-kit generate --config=./drizzle.config.postgres.prod.ts",
+		"db:push:pg:dev": "npx drizzle-kit push --config=./drizzle.config.postgres.dev.ts",
+		"db:push:pg:prod": "npx drizzle-kit push --config=./drizzle.config.postgres.prod.ts"
+	},
+	"devDependencies": {
+		"@faker-js/faker": "^9.8.0",
+		"@types/lodash": "^4.17.20",
+		"@types/node": "^24.0.3",
+		"drizzle-kit": "^0.31.1",
+		"tsx": "^4.20.3"
+	},
+	"dependencies": {
+		"@neondatabase/serverless": "1.0.1",
+		"dotenv": "16.5.0",
+		"drizzle-orm": "0.44.2",
+		"drizzle-zod": "0.6.1",
+		"jose": "6.0.11",
+		"lodash": "4.17.21",
+		"postgres": "3.4.7",
+		"zod": "3.25.67"
+	}
+}

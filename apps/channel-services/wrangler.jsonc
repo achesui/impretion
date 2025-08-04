@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "channel-services",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-06-13",
+  "compatibility_flags": ["nodejs_compat"],
+  "kv_namespaces": [
+    {
+      "binding": "SYSTEM_CACHE",
+      "id": "a367718a522649c494baeb1548e96644",
+    },
+  ],
+  "services": [
+    {
+      "binding": "CORE_SERVICE",
+      "service": "core-service",
+    },
+    /*
+    {
+      "binding": "GENERATOR_SERVICE",
+      "service": "generator"
+    },
+    {
+      "binding": "CRYPTO_SERVICE",
+      "service": "crypto-service"
+    }
+    */
+  ],
+}

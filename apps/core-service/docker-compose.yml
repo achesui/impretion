@@ -1,0 +1,32 @@
+# Aquí definimos la lista de "servicios" (contenedores) que queremos correr.
+services:
+  # Nombramos nuestro servicio. Podemos llamarlo 'db', 'postgres', o lo que queramos.
+  db:
+    # El nombre del contenedor que se creará. Es como el --name de antes.
+    container_name: postgresql-organizations
+
+    # La imagen de Docker que queremos usar.
+    image: postgres:16
+
+    # Política de reinicio. 'always' significa que si el contenedor se cae, Docker intentará levantarlo de nuevo.
+    restart: always
+
+    # Las variables de entorno. Es como el flag -e.
+    environment:
+      - POSTGRES_DB=organizations_db
+      - POSTGRES_USER=org_user
+      - POSTGRES_PASSWORD=achesui
+
+    # El mapeo de puertos. Es como el flag -p.
+    ports:
+      - '5431:5432' # "PUERTO_EN_MI_PC:PUERTO_EN_EL_CONTENEDOR"
+
+    # Los volúmenes. Esto es para que los datos persistan.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+# Aquí definimos los volúmenes que hemos nombrado arriba.
+volumes:
+  postgres_data:
+    # Esto es opcional, pero le dice a Docker que no use un driver externo.
+    driver: local

@@ -1,0 +1,42 @@
+{
+	"name": "core-service",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-06-20",
+	"compatibility_flags": ["nodejs_compat_v2", "nodejs_compat_populate_process_env"],
+	"observability": {
+		"enabled": true,
+	},
+	"hyperdrive": [
+		{
+			"binding": "HYPERDRIVE",
+			"id": "dfc72c5245f6482fbd8d4a9f026ef12e",
+			"localConnectionString": "postgres://org_user:achesui@localhost:5431/organizations_db",
+		},
+	],
+	/*
+	"services": [
+		{ "binding": "INTEGRATIONS_GATEWAY", "service": "integrations-gateway" },
+		{
+			"binding": "APIS_GATEWAY",
+			"service": "apis-gateway",
+		},
+		{
+			"binding": "CHANNEL_SERVICES",
+			"service": "channel-services",
+		},
+	],
+	*/
+	"d1_databases": [
+		{
+			"binding": "LOGS",
+			"database_id": "a0567d3b-5088-40d7-9b2d-d7f1b6933301",
+			"database_name": "logs",
+		},
+	],
+	"kv_namespaces": [
+		{
+			"binding": "DATABASE_CACHE",
+			"id": "492d7fa56ac349e09d6b1e37f5f78d83",
+		},
+	],
+}

@@ -1,0 +1,11 @@
+{
+  "name": "@worker/channel-services",
+  "scripts": {
+    "dev": "wrangler dev --port 3002 --persist-to=../../shared-workers-data",
+    "deploy": "wrangler deploy --minify"
+  },
+  "dependencies": {
+    "twilio": "5.4.5",
+    "@base/shared-types": "workspace:*"
+  }
+}
