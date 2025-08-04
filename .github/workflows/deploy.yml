@@ -30,8 +30,6 @@ jobs:
       # ✅ PASO 4: Setup pnpm ANTES que Node.js (CRÍTICO)
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # ✅ Versión más reciente de la action
-        with:
-          version: 9 # ✅ Tu versión exacta (puedes usar 9.x.x para más flexibilidad)
 
       # ✅ PASO 5: Setup Node.js CON cache de pnpm
       - name: Setup Node.js
