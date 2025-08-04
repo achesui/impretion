@@ -1,0 +1,13 @@
+{
+	"name": "@worker/producer-billing-orchestrator",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev --port 3003 --persist-to=../../shared-workers-data",
+		"start": "wrangler dev",
+		"test": "vitest",
+		"cf-typegen": "wrangler types",
+		"db:seed": "wrangler d1 execute LOGS --local --file ./seed.sql"
+	}
+}

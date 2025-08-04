@@ -37,6 +37,11 @@ const serviceMap = {
   "apis-gateway": "@worker/apis-gateway",
   client: "@worker/dashboard",
   "channel-services": "@worker/channel-services",
+  "consumer-billing-balance": "@worker/consumer-billing-balance",
+  "etl-log-processor": "@worker/etl-log-processor",
+  "integrations-gateway": "@worker/integrations-gateway",
+  generator: "@worker/generator",
+  "producer-billing-orchestrator": "@worker/producer-billing-orchestrator",
 };
 
 // Construir los filtros
@@ -45,7 +50,7 @@ const filters = services.map((service) => {
   if (!fullName) {
     console.log(`❌ Servicio desconocido: ${service}`);
     console.log(
-      `📋 Servicios disponibles: ${Object.keys(serviceMap).join(", ")}`
+      `📋 Servicios disponibles: ${Object.keys(serviceMap).join(", ")}`,
     );
     process.exit(1);
   }

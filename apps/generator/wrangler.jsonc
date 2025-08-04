@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "generator",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-03-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "ASSISTANT_WRAPPER", // How your Agent is called from your Worker
+        "class_name": "AssistantMessageWrapper" // Must match the class name of the Agent in your code
+      }
+    ]
+  },
+  "ai": {
+    "binding": "AI"
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      // Mandatory for the Agent to store state
+      "new_sqlite_classes": ["AssistantMessageWrapper"]
+    }
+  ],
+  "services": [
+    {
+      "binding": "CHANNEL_SERVICES",
+      "service": "channel-services",
+      "entrypoint": "default",
+      "experimental_remote": true
+    },
+    {
+      "binding": "CORE_SERVICE",
+      "service": "core-service"
+    },
+    {
+      "binding": "CRYPTO_SERVICE",
+      "service": "crypto-service"
+    }
+  ]
+}

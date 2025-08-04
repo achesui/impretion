@@ -1,0 +1,27 @@
+{
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "producer-billing-orchestrator",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-06-07",
+	"compatibility_flags": ["nodejs_compat_v2"],
+	"observability": {
+		"enabled": true,
+	},
+	"triggers": {
+		"crons": ["*/30 * * * *"], // 0 */6 * * * - Luego de probar, cambiar a 6h
+	},
+	"queues": {
+		"producers": [
+			{
+				"queue": "consumer-billing-balance",
+				"binding": "BILLING_JOBS_QUEUE",
+			},
+		],
+	},
+	"services": [
+		{
+			"binding": "CORE_SERVICE",
+			"service": "core-service",
+		},
+	],
+}

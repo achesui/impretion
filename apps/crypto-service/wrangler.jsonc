@@ -1,0 +1,9 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "crypto-service",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-06-12",
+  "observability": {
+    "enabled": true,
+  },
+}

@@ -14,7 +14,7 @@ importers:
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.8.19
-        version: 0.8.59(@cloudflare/workers-types@4.20250803.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4(@types/node@24.0.3)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.3))
+        version: 0.8.59(@cloudflare/workers-types@4.20250620.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4(@types/node@24.0.3)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.3))
       prettier:
         specifier: 3.6.2
         version: 3.6.2
@@ -29,7 +29,7 @@ importers:
         version: 3.2.4(@types/node@24.0.3)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.3)
       wrangler:
         specifier: 4.27.0
-        version: 4.27.0(@cloudflare/workers-types@4.20250803.0)
+        version: 4.27.0(@cloudflare/workers-types@4.20250620.0)
 
   apps/apis-gateway:
     dependencies:
@@ -159,7 +159,7 @@ importers:
     devDependencies:
       '@cloudflare/vite-plugin':
         specifier: 1.7.2
-        version: 1.7.2(rollup@4.46.2)(vite@6.3.5(@types/node@24.0.3)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.3))(workerd@1.20250730.0)(wrangler@4.27.0(@cloudflare/workers-types@4.20250803.0))
+        version: 1.7.2(rollup@4.46.2)(vite@6.3.5(@types/node@24.0.3)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.3))(workerd@1.20250730.0)(wrangler@4.27.0(@cloudflare/workers-types@4.20250620.0))
       '@eslint/js':
         specifier: 9.25.0
         version: 9.25.0
@@ -206,6 +206,8 @@ importers:
         specifier: ^6.3.5
         version: 6.3.5(@types/node@24.0.3)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.3)
 
+  apps/consumer-billing-balance: {}
+
   apps/core-service:
     dependencies:
       '@base/shared-types':
@@ -219,10 +221,10 @@ importers:
         version: 16.5.0
       drizzle-orm:
         specifier: 0.44.2
-        version: 0.44.2(@cloudflare/workers-types@4.20250803.0)(@neondatabase/serverless@1.0.1)(@types/pg@8.15.5)(postgres@3.4.7)
+        version: 0.44.2(@cloudflare/workers-types@4.20250620.0)(@neondatabase/serverless@1.0.1)(@types/pg@8.15.5)(postgres@3.4.7)
       drizzle-zod:
         specifier: 0.6.1
-        version: 0.6.1(drizzle-orm@0.44.2(@cloudflare/workers-types@4.20250803.0)(@neondatabase/serverless@1.0.1)(@types/pg@8.15.5)(postgres@3.4.7))(zod@3.25.67)
+        version: 0.6.1(drizzle-orm@0.44.2(@cloudflare/workers-types@4.20250620.0)(@neondatabase/serverless@1.0.1)(@types/pg@8.15.5)(postgres@3.4.7))(zod@3.25.67)
       jose:
         specifier: 6.0.11
         version: 6.0.11
@@ -251,6 +253,34 @@ importers:
       tsx:
         specifier: ^4.20.3
         version: 4.20.3
+
+  apps/crypto-service:
+    dependencies:
+      '@base/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+
+  apps/etl-log-processor: {}
+
+  apps/generator:
+    dependencies:
+      '@base/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+      agents:
+        specifier: 0.0.46
+        version: 0.0.46(@cloudflare/workers-types@4.20250620.0)
+      zod:
+        specifier: 3.25.67
+        version: 3.25.67
+
+  apps/integrations-gateway:
+    dependencies:
+      '@base/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
+
+  apps/producer-billing-orchestator: {}
 
   packages/shared-config: {}
 
@@ -513,8 +543,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cloudflare/workers-types@4.20250803.0':
-    resolution: {integrity: sha512-Zgfb9y971379/b0fDvSkH6l830dVDanO5kxUHbg2TI5kQDWMRtFPsAntRtEwRqOU7aFFDrDd4gp/bcs6+ZokUQ==}
+  '@cloudflare/workers-types@4.20250620.0':
+    resolution: {integrity: sha512-EVvRB/DJEm6jhdKg+A4Qm4y/ry1cIvylSgSO3/f/Bv161vldDRxaXM2YoQQWFhLOJOw0qtrHsKOD51KYxV1XCw==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -2345,6 +2375,9 @@ packages:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
     engines: {node: '>= 6.0.0'}
 
+  agents@0.0.46:
+    resolution: {integrity: sha512-YC49h/KCP1Og7Pd0XVWD22f5Xg6MevUL0qtIJUjK3xP7Zb2F9lGzGqcvgkRmqalLEwZByZqDknvMb9nuDPnVXg==}
+
   ajv@6.12.6:
     resolution: {integrity: sha512-j3fVLgvTo527anyYyJOGTYJbG+vnnQYvE0m5mmkc1TK+nxAppkCLMIL0aZ4dblVCNoGShhm+kzE4ZUykBoMg4g==}
 
@@ -2517,6 +2550,10 @@ packages:
 
   cookie@1.0.2:
     resolution: {integrity: sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==}
+    engines: {node: '>=18'}
+
+  cron-schedule@5.0.4:
+    resolution: {integrity: sha512-nH0a49E/kSVk6BeFgKZy4uUsy6D2A16p120h5bYD9ILBhQu7o2sJFH+WI4R731TSBQ0dB1Ik7inB/dRAB4C8QQ==}
     engines: {node: '>=18'}
 
   cross-spawn@7.0.6:
@@ -2811,6 +2848,10 @@ packages:
   esutils@2.0.3:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
+
+  event-target-shim@6.0.2:
+    resolution: {integrity: sha512-8q3LsZjRezbFZ2PN+uP+Q7pnHUMmAOziU2vA2OwoFaKIXxlxl38IylhSSgUorWu/rf4er67w0ikBqjBFk/pomA==}
+    engines: {node: '>=10.13.0'}
 
   exit-hook@2.2.1:
     resolution: {integrity: sha512-eNTPlAD67BmP31LDINZ3U7HSF8l57TxOY2PmBJ1shpCvpnxBF93mWCE8YHBnXs8qiUZJc9WDcWIeC3a2HIAMfw==}
@@ -3253,6 +3294,11 @@ packages:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
 
+  nanoid@5.1.5:
+    resolution: {integrity: sha512-Ir/+ZpE9fDsNH0hQ3C68uyThDXzYcim2EqcZ8zn8Chtt1iylPT9xXJB0kPCnqzgcEGikO9RxSrh63MsmVCU7Fw==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
 
@@ -3285,6 +3331,14 @@ packages:
   parent-module@1.0.1:
     resolution: {integrity: sha512-GQ2EWRpQV8/o+Aw8YqtfZZPfNRWZYkbidE9k5rpl/hC3vtHHBfGm2Ifi6qWV+coDGkrUKZAxE3Lot5kcsRlh+g==}
     engines: {node: '>=6'}
+
+  partyserver@0.0.66:
+    resolution: {integrity: sha512-GyC1uy4dvC4zPkwdzHqCkQ1J1CMiI0swIJQ0qqsJh16WNkEo5QHuU3l3ikLO8t+Yq0cRr0qO8++xbr11h+107w==}
+    peerDependencies:
+      '@cloudflare/workers-types': ^4.20240729.0
+
+  partysocket@1.1.2:
+    resolution: {integrity: sha512-vWyxg0dYJewBsT6BaYkq+DEavYw+N/8J0jUXYSuZRRJdnmMJY+rkCg19t/8c3pTSyg8FjJH8VzIaHBhFMQRDIw==}
 
   path-exists@4.0.0:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
@@ -4161,7 +4215,7 @@ snapshots:
     optionalDependencies:
       workerd: 1.20250730.0
 
-  '@cloudflare/vite-plugin@1.7.2(rollup@4.46.2)(vite@6.3.5(@types/node@24.0.3)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.3))(workerd@1.20250730.0)(wrangler@4.27.0(@cloudflare/workers-types@4.20250803.0))':
+  '@cloudflare/vite-plugin@1.7.2(rollup@4.46.2)(vite@6.3.5(@types/node@24.0.3)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.3))(workerd@1.20250730.0)(wrangler@4.27.0(@cloudflare/workers-types@4.20250620.0))':
     dependencies:
       '@cloudflare/unenv-preset': 2.3.3(unenv@2.0.0-rc.17)(workerd@1.20250730.0)
       '@mjackson/node-fetch-server': 0.6.1
@@ -4172,7 +4226,7 @@ snapshots:
       tinyglobby: 0.2.14
       unenv: 2.0.0-rc.17
       vite: 6.3.5(@types/node@24.0.3)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.3)
-      wrangler: 4.27.0(@cloudflare/workers-types@4.20250803.0)
+      wrangler: 4.27.0(@cloudflare/workers-types@4.20250620.0)
       ws: 8.18.0
     transitivePeerDependencies:
       - bufferutil
@@ -4180,7 +4234,7 @@ snapshots:
       - utf-8-validate
       - workerd
 
-  '@cloudflare/vitest-pool-workers@0.8.59(@cloudflare/workers-types@4.20250803.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4(@types/node@24.0.3)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.3))':
+  '@cloudflare/vitest-pool-workers@0.8.59(@cloudflare/workers-types@4.20250620.0)(@vitest/runner@3.2.4)(@vitest/snapshot@3.2.4)(vitest@3.2.4(@types/node@24.0.3)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.3))':
     dependencies:
       '@vitest/runner': 3.2.4
       '@vitest/snapshot': 3.2.4
@@ -4190,7 +4244,7 @@ snapshots:
       miniflare: 4.20250730.0
       semver: 7.7.2
       vitest: 3.2.4(@types/node@24.0.3)(jiti@2.5.1)(lightningcss@1.30.1)(tsx@4.20.3)
-      wrangler: 4.27.0(@cloudflare/workers-types@4.20250803.0)
+      wrangler: 4.27.0(@cloudflare/workers-types@4.20250620.0)
       zod: 3.25.67
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
@@ -4227,8 +4281,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20250730.0':
     optional: true
 
-  '@cloudflare/workers-types@4.20250803.0':
-    optional: true
+  '@cloudflare/workers-types@4.20250620.0': {}
 
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
@@ -5854,6 +5907,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  agents@0.0.46(@cloudflare/workers-types@4.20250620.0):
+    dependencies:
+      cron-schedule: 5.0.4
+      nanoid: 5.1.5
+      partyserver: 0.0.66(@cloudflare/workers-types@4.20250620.0)
+      partysocket: 1.1.2
+    transitivePeerDependencies:
+      - '@cloudflare/workers-types'
+
   ajv@6.12.6:
     dependencies:
       fast-deep-equal: 3.1.3
@@ -6042,6 +6104,8 @@ snapshots:
 
   cookie@1.0.2: {}
 
+  cron-schedule@5.0.4: {}
+
   cross-spawn@7.0.6:
     dependencies:
       path-key: 3.1.1
@@ -6093,16 +6157,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.2(@cloudflare/workers-types@4.20250803.0)(@neondatabase/serverless@1.0.1)(@types/pg@8.15.5)(postgres@3.4.7):
+  drizzle-orm@0.44.2(@cloudflare/workers-types@4.20250620.0)(@neondatabase/serverless@1.0.1)(@types/pg@8.15.5)(postgres@3.4.7):
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20250803.0
+      '@cloudflare/workers-types': 4.20250620.0
       '@neondatabase/serverless': 1.0.1
       '@types/pg': 8.15.5
       postgres: 3.4.7
 
-  drizzle-zod@0.6.1(drizzle-orm@0.44.2(@cloudflare/workers-types@4.20250803.0)(@neondatabase/serverless@1.0.1)(@types/pg@8.15.5)(postgres@3.4.7))(zod@3.25.67):
+  drizzle-zod@0.6.1(drizzle-orm@0.44.2(@cloudflare/workers-types@4.20250620.0)(@neondatabase/serverless@1.0.1)(@types/pg@8.15.5)(postgres@3.4.7))(zod@3.25.67):
     dependencies:
-      drizzle-orm: 0.44.2(@cloudflare/workers-types@4.20250803.0)(@neondatabase/serverless@1.0.1)(@types/pg@8.15.5)(postgres@3.4.7)
+      drizzle-orm: 0.44.2(@cloudflare/workers-types@4.20250620.0)(@neondatabase/serverless@1.0.1)(@types/pg@8.15.5)(postgres@3.4.7)
       zod: 3.25.67
 
   dunder-proto@1.0.1:
@@ -6291,6 +6355,8 @@ snapshots:
       '@types/estree': 1.0.8
 
   esutils@2.0.3: {}
+
+  event-target-shim@6.0.2: {}
 
   exit-hook@2.2.1: {}
 
@@ -6682,6 +6748,8 @@ snapshots:
 
   nanoid@3.3.11: {}
 
+  nanoid@5.1.5: {}
+
   natural-compare@1.4.0: {}
 
   node-releases@2.0.19: {}
@@ -6712,6 +6780,15 @@ snapshots:
   parent-module@1.0.1:
     dependencies:
       callsites: 3.1.0
+
+  partyserver@0.0.66(@cloudflare/workers-types@4.20250620.0):
+    dependencies:
+      '@cloudflare/workers-types': 4.20250620.0
+      nanoid: 5.1.5
+
+  partysocket@1.1.2:
+    dependencies:
+      event-target-shim: 6.0.2
 
   path-exists@4.0.0: {}
 
@@ -7293,7 +7370,7 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20250730.0
       '@cloudflare/workerd-windows-64': 1.20250730.0
 
-  wrangler@4.27.0(@cloudflare/workers-types@4.20250803.0):
+  wrangler@4.27.0(@cloudflare/workers-types@4.20250620.0):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.4.0
       '@cloudflare/unenv-preset': 2.5.0(unenv@2.0.0-rc.19)(workerd@1.20250730.0)
@@ -7304,7 +7381,7 @@ snapshots:
       unenv: 2.0.0-rc.19
       workerd: 1.20250730.0
     optionalDependencies:
-      '@cloudflare/workers-types': 4.20250803.0
+      '@cloudflare/workers-types': 4.20250620.0
       fsevents: 2.3.3
     transitivePeerDependencies:
       - bufferutil

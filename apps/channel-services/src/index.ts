@@ -11,10 +11,9 @@ import {
   SubaccountTokens,
   TemplateTypeProps,
 } from "../lib/handlers/twilio/twilio-types";
-import { ServiceResponse } from "../../global";
 import { organizationalConnectionHandler } from "../lib/organizational-connection-handler";
 import { twilioClient } from "../lib/handlers/twilio/client";
-import { GetConnectionResponse } from "@core-service/types";
+import { ServiceResponse } from "@base/shared-types";
 
 export default class ChannelServices extends WorkerEntrypoint<Env> {
   private app = new Hono<{ Bindings: Env }>();
@@ -40,11 +39,11 @@ export default class ChannelServices extends WorkerEntrypoint<Env> {
     });
 
     this.app.post("/channels/twilio/verification-validation", async (c) =>
-      verificationValidation(c)
+      verificationValidation(c),
     );
 
     this.app.post("/channels/twilio/whatsapp", (c) =>
-      whatsappIncomingMessage(c)
+      whatsappIncomingMessage(c),
     );
 
     /*
@@ -81,20 +80,20 @@ export default class ChannelServices extends WorkerEntrypoint<Env> {
   }
 
   async twilioTemplateMessages(
-    props: TemplateTypeProps
+    props: TemplateTypeProps,
   ): Promise<ServiceResponse<string, any>> {
     return await templateHandler(props, this.env);
   }
 
   // Flujos de conexión a aplicaciones terceras según la conexión ORGANIZACIONAL. ej: Twilio.
   async organizationalConnectionFlow(
-    props: OrganizationalTypeConnectionFlow
+    props: OrganizationalTypeConnectionFlow,
   ): Promise<ServiceResponse<{}, string>> {
     try {
       console.log("En el flow: ", props);
       const organizationalResponse = await organizationalConnectionHandler(
         props,
-        this.env
+        this.env,
       );
       console.log("organizationalResponse => ", organizationalResponse);
       return {

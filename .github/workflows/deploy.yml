@@ -1,42 +1,43 @@
-# .github/workflows/deploy-dashboard.yml
-
-name: Worker Deployment
+name: Monorepo Workers Deployment
 
 on:
   push:
-    branches:
-      - main
-
-permissions:
-  contents: read
-  deployments: write
+    branches: [main]
+  workflow_dispatch: # Permite trigger manual
 
 jobs:
-  deploy-dashboard:
+  detect-changes:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
+    outputs:
+      workers: ${{ steps.changes.outputs.workers }}
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - id: changes
+        run: |
+          # Script que detecta workers cambiados dinámicamente
+          CHANGED_WORKERS=$(node scripts/detect-changed-workers.js)
+          echo "workers=$CHANGED_WORKERS" >> $GITHUB_OUTPUT
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+  deploy:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.workers != '[]'
+    strategy:
+      matrix:
+        worker: ${{ fromJSON(needs.detect-changes.outputs.workers) }}
+      fail-fast: false # No para todos si uno falla
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Deploy with Turborepo
-        run: pnpm turbo run deploy --filter=@worker/core-service
+      - run: pnpm install --frozen-lockfile
+      - name: Deploy ${{ matrix.worker }}
+        run: pnpm turbo run deploy --filter=@worker/${{ matrix.worker }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      - name: Success!
-        run: echo "✅ Dashboard Worker desplegado correctamente con Turborepo ✅"

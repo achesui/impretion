@@ -1,0 +1,11 @@
+{
+  "name": "@worker/crypto-service",
+  "scripts": {
+    "dev": "wrangler dev --port 3003 --persist-to=../../shared-workers-data",
+    "deploy": "wrangler deploy --minify",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@base/shared-types": "workspace:*"
+  }
+}

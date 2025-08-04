@@ -1,0 +1,19 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "integrations-gateway",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-06-13",
+  "services": [
+    {
+      "binding": "CRYPTO_SERVICE",
+      "service": "crypto-service",
+    },
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "ACCESS_TOKENS",
+      "id": "fb2e283847794f7d97fda022ce7560de",
+      "preview_id": "fb2e283847794f7d97fda022ce7560de",
+    },
+  ],
+}

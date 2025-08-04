@@ -1,0 +1,46 @@
+{
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "etl-log-processor",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-06-07",
+	"observability": {
+		"enabled": true,
+	},
+	"r2_buckets": [
+		{
+			"binding": "LOGS",
+			"bucket_name": "logs",
+		},
+	],
+	"queues": {
+		"producers": [
+			{
+				"queue": "etl-generations",
+				"binding": "ETL_GENERATIONS",
+			},
+		],
+		"consumers": [
+			{
+				"queue": "etl-generations",
+			},
+		],
+	},
+	"d1_databases": [
+		{
+			"binding": "D1_DB_LOGS",
+			"database_name": "logs",
+			"database_id": "a0567d3b-5088-40d7-9b2d-d7f1b6933301",
+		},
+	],
+	"services": [
+		{
+			"binding": "CORE_SERVICE",
+			"service": "core-service",
+		},
+		{
+			"binding": "CRYPTO_SERVICE",
+			"service": "crypto-service",
+		},
+	],
+}
+// npx wrangler dev -c producer-billing-orchestator/wrangler.jsonc -c etl-log-processor/wrangler.jsonc  -c consumer-billing-balance/wrangler.jsonc -c core-service/wrangler.jsonc -c integrations-gateway/wrangler.jsonc -c crypto-service/wrangler.jsonc --persist-to ./SHARED_DATA

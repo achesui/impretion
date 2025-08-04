@@ -1,5 +1,5 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "apis-gateway",
   "main": "src/index.ts",
   "compatibility_date": "2025-06-09",
@@ -7,13 +7,13 @@
   "kv_namespaces": [
     {
       "binding": "SYSTEM_CACHE",
-      "id": "a367718a522649c494baeb1548e96644"
-    }
+      "id": "a367718a522649c494baeb1548e96644",
+    },
   ],
   "services": [
     {
       "binding": "CORE_SERVICE",
-      "service": "core-service"
-    }
-  ]
+      "service": "core-service",
+    },
+  ],
 }

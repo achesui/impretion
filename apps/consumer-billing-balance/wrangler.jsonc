@@ -1,0 +1,32 @@
+{
+	"$schema": "../../node_modules/wrangler/config-schema.json",
+	"name": "consumer-billing-balance",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-06-10",
+	"observability": {
+		"enabled": true,
+	},
+	"d1_databases": [
+		{
+			"binding": "LOGS",
+			"database_id": "a0567d3b-5088-40d7-9b2d-d7f1b6933301",
+		},
+	],
+	"queues": {
+		"consumers": [
+			{
+				"queue": "consumer-billing-balance",
+				"max_batch_size": 10,
+				"max_batch_timeout": 5,
+				"max_retries": 3,
+				//"dead_letter_queue": "dlq-billing-balance" [Por implementar]
+			},
+		],
+	},
+	"services": [
+		{
+			"binding": "CORE_SERVICE",
+			"service": "core-service",
+		},
+	],
+}
