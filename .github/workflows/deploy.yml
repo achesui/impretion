@@ -6,11 +6,11 @@ on:
     branches:
       - "main"
     # ✅ OPCIONAL: Solo ejecutar cuando cambien archivos específicos
-    paths:
-      - "apps/worker/dashboard/**" # Ajusta la ruta según tu monorepo
-      - "packages/**" # Si tienes dependencias compartidas
-      - "pnpm-lock.yaml" # Si cambia el lockfile
-      - "package.json" # Si cambian dependencias
+    # paths:
+    #   - "apps/worker/dashboard/**"
+    #   - "packages/**"
+    #   - "pnpm-lock.yaml"
+    #   - "package.json"
 
 # ✅ PASO 2: Permisos necesarios para deployments
 permissions:
