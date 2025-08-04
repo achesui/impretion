@@ -19,6 +19,7 @@ export default class CoreService extends WorkerEntrypoint<Env> {
 	}
 
 	async fetch(request: Request): Promise<Response> {
+		console.log('Test core-service');
 		return this.app.fetch(request, this.env, this.ctx);
 	}
 

@@ -15,6 +15,7 @@ type BillingJob = {
  */
 export default {
 	async queue(batch: MessageBatch<BillingJob>, env: Env): Promise<void> {
+		console.log('consumer billing balance test');
 		const promises = batch.messages.map((message) => settleOrganizationBalance(message, env));
 		await Promise.all(promises);
 	},
@@ -65,7 +66,7 @@ async function settleOrganizationBalance(message: Message<BillingJob>, env: Env)
 			// El error es algo que no preveíamos (ej. DB caída, bug en el código de core-service).
 			// Estos errores se reintentan.
 			console.error(
-				`[RETRY] [${organizationId}] Fallo de sistema inesperado desde core-service: ${errorDetails.name} - ${errorDetails.message}. Reintentando mensaje.`
+				`[RETRY] [${organizationId}] Fallo de sistema inesperado desde core-service: ${errorDetails.name} - ${errorDetails.message}. Reintentando mensaje.`,
 			);
 			message.retry();
 		}
@@ -76,7 +77,7 @@ async function settleOrganizationBalance(message: Message<BillingJob>, env: Env)
 		// en lugar de un objeto `ServiceResponse` bien formado.
 		console.error(
 			`[FATAL-RETRY] [${organizationId}] Fallo catastrófico al comunicarse con core-service para el Job ${jobId}. Reintentando.`,
-			error
+			error,
 		);
 		message.retry();
 	}
