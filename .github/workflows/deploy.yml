@@ -20,11 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       workers: ${{ steps.changes.outputs.workers }}
+      has-changes: ${{ steps.changes.outputs.has-changes }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2 # Necesario para git diff
+          fetch-depth: 2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -33,68 +34,135 @@ jobs:
 
       - id: changes
         run: |
+          # Función para convertir lista a JSON array
+          to_json_array() {
+            if [ -z "$1" ]; then
+              echo "[]"
+            else
+              echo "$1" | tr ' ' '\n' | grep -v '^$' | sort -u | jq -R -s -c 'split("\n")[:-1]'
+            fi
+          }
+
           # Si es manual, usar los workers especificados
           if [ "${{ github.event.inputs.workers }}" != "" ]; then
+            echo "🔧 Manual deployment triggered"
+            
             if [ "${{ github.event.inputs.workers }}" = "all" ]; then
               # Listar todos los workers
-              WORKERS=$(ls apps/ | jq -R -s -c 'split("\n")[:-1]')
+              ALL_WORKERS=$(find apps -maxdepth 1 -type d ! -name apps | sed 's|apps/||' | tr '\n' ' ')
+              WORKERS=$(to_json_array "$ALL_WORKERS")
+              echo "Manual - deploying all workers: $WORKERS"
             else
-              # Convertir string separado por comas a JSON array
-              WORKERS=$(echo "${{ github.event.inputs.workers }}" | tr ',' '\n' | jq -R -s -c 'split("\n")[:-1]')
+              # Convertir string separado por comas a lista limpia
+              INPUT_WORKERS=$(echo "${{ github.event.inputs.workers }}" | tr ',' ' ' | tr -s ' ')
+              WORKERS=$(to_json_array "$INPUT_WORKERS")
+              echo "Manual - deploying specified workers: $WORKERS"
             fi
-            echo "Manual workers selected: $WORKERS"
+            
+            # Verificar que los workers existen
+            VALID_WORKERS=""
+            for worker in $(echo "$INPUT_WORKERS"); do
+              if [ -d "apps/$worker" ]; then
+                VALID_WORKERS="$VALID_WORKERS $worker"
+              else
+                echo "⚠️ Warning: Worker '$worker' not found, skipping"
+              fi
+            done
+            
+            WORKERS=$(to_json_array "$VALID_WORKERS")
+            
           else
-            # Auto-detectar cambios inline
+            # Auto-detectar cambios
             echo "🔍 Auto-detecting changed workers..."
             
-            # Obtener archivos cambiados
-            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+            # Obtener archivos cambiados con mejor detección
+            if [ "${{ github.event_name }}" = "push" ]; then
+              if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+                # Primer push a la rama
+                CHANGED_FILES=$(git diff --name-only HEAD~1 2>/dev/null || git ls-tree --name-only -r HEAD)
+              else
+                CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }})
+              fi
+            else
+              CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+            fi
+            
             echo "📁 Changed files:"
             echo "$CHANGED_FILES"
             
-            # Listar todos los workers
-            ALL_WORKERS=$(ls apps/)
-            echo "🔍 All workers: $ALL_WORKERS"
+            # Listar todos los workers disponibles
+            ALL_WORKERS=$(find apps -maxdepth 1 -type d ! -name apps | sed 's|apps/||' | tr '\n' ' ')
+            echo "🔍 Available workers: $ALL_WORKERS"
             
             # Detectar workers afectados
             AFFECTED_WORKERS=""
             
+            # Primero verificar cambios en packages compartidos
+            SHARED_CHANGED=false
             for file in $CHANGED_FILES; do
-              echo "📝 Checking: $file"
-              
-              # Cambio directo en worker
-              if [[ $file == apps/*/* ]]; then
-                WORKER=$(echo $file | cut -d'/' -f2)
-                echo "  ✅ Direct change in: $WORKER"
-                if [[ ! $AFFECTED_WORKERS =~ $WORKER ]]; then
-                  AFFECTED_WORKERS="$AFFECTED_WORKERS $WORKER"
-                fi
-              fi
-              
-              # Cambio en packages compartidos
-              if [[ $file == packages/shared/* ]] || [[ $file == packages/types/* ]] || [[ $file == packages/auth/* ]] || [[ $file == packages/api/* ]] || [[ $file == packages/notifications/* ]]; then
-                echo "  🔄 Shared package change, affecting all workers"
-                AFFECTED_WORKERS="$ALL_WORKERS"
+              if [[ $file == packages/shared/* ]] || [[ $file == packages/types/* ]] || \
+                 [[ $file == packages/auth/* ]] || [[ $file == packages/api/* ]] || \
+                 [[ $file == packages/notifications/* ]] || [[ $file == package.json ]] || \
+                 [[ $file == pnpm-lock.yaml ]] || [[ $file == turbo.json ]]; then
+                echo "🔄 Shared dependency changed: $file - affecting all workers"
+                SHARED_CHANGED=true
                 break
               fi
             done
             
-            # Convertir a JSON array
-            if [ -z "$AFFECTED_WORKERS" ]; then
-              WORKERS="[]"
+            if [ "$SHARED_CHANGED" = true ]; then
+              AFFECTED_WORKERS="$ALL_WORKERS"
             else
-              WORKERS=$(echo $AFFECTED_WORKERS | tr ' ' '\n' | sort -u | jq -R -s -c 'split("\n")[:-1]')
+              # Cambios específicos en workers
+              for file in $CHANGED_FILES; do
+                if [[ $file == apps/*/* ]]; then
+                  WORKER=$(echo $file | cut -d'/' -f2)
+                  if [ -d "apps/$WORKER" ]; then
+                    echo "  ✅ Direct change detected in: $WORKER"
+                    if [[ ! $AFFECTED_WORKERS =~ $WORKER ]]; then
+                      AFFECTED_WORKERS="$AFFECTED_WORKERS $WORKER"
+                    fi
+                  fi
+                fi
+              done
             fi
             
+            # Convertir a JSON array
+            WORKERS=$(to_json_array "$AFFECTED_WORKERS")
             echo "🚀 Workers to deploy: $WORKERS"
           fi
 
+          # Determinar si hay cambios
+          if [ "$WORKERS" = "[]" ] || [ "$WORKERS" = "" ]; then
+            HAS_CHANGES="false"
+            WORKERS="[]"
+            echo "ℹ️ No workers to deploy"
+          else
+            HAS_CHANGES="true"
+            echo "✅ Found workers to deploy: $WORKERS"
+          fi
+
           echo "workers=$WORKERS" >> $GITHUB_OUTPUT
+          echo "has-changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
+
+  # Job que siempre se ejecuta para manejar el caso "sin cambios"
+  check-deployment:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has-changes == 'false'
+    steps:
+      - name: No deployment needed
+        run: |
+          echo "ℹ️ No workers require deployment"
+          echo "This can happen when:"
+          echo "  - No relevant files were changed"
+          echo "  - Manual deployment with empty worker list"
+          echo "  - All specified workers don't exist"
 
   deploy:
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: needs.detect-changes.outputs.workers != '[]' && needs.detect-changes.outputs.workers != ''
+    if: needs.detect-changes.outputs.has-changes == 'true'
     strategy:
       matrix:
         worker: ${{ fromJSON(needs.detect-changes.outputs.workers) }}
@@ -120,8 +188,24 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify worker exists
+        run: |
+          if [ ! -d "apps/${{ matrix.worker }}" ]; then
+            echo "❌ Worker directory 'apps/${{ matrix.worker }}' not found"
+            exit 1
+          fi
+
+          if [ ! -f "apps/${{ matrix.worker }}/package.json" ]; then
+            echo "❌ Worker 'apps/${{ matrix.worker }}/package.json' not found"
+            exit 1
+          fi
+
+          echo "✅ Worker ${{ matrix.worker }} verified"
+
       - name: Deploy ${{ matrix.worker }}
-        run: pnpm turbo run deploy --filter=@worker/${{ matrix.worker }}
+        run: |
+          echo "🚀 Deploying ${{ matrix.worker }}..."
+          pnpm turbo run deploy --filter=@worker/${{ matrix.worker }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -131,19 +215,32 @@ jobs:
 
   summary:
     runs-on: ubuntu-latest
-    needs: [detect-changes, deploy]
+    needs: [detect-changes, check-deployment, deploy]
     if: always()
     steps:
       - name: Deployment Summary
         run: |
           echo "🚀 Deployment Summary"
-          echo "Workers: ${{ needs.detect-changes.outputs.workers }}"
+          echo "Workers detected: ${{ needs.detect-changes.outputs.workers }}"
+          echo "Has changes: ${{ needs.detect-changes.outputs.has-changes }}"
 
-          if [ "${{ needs.deploy.result }}" = "success" ]; then
-            echo "✅ All deployments successful!"
-          elif [ "${{ needs.deploy.result }}" = "failure" ]; then
-            echo "❌ Some deployments failed"
-            exit 1
+          if [ "${{ needs.detect-changes.outputs.has-changes }}" = "false" ]; then
+            echo "ℹ️ No workers required deployment"
+            if [ "${{ needs.check-deployment.result }}" = "success" ]; then
+              echo "✅ Workflow completed successfully (no deployment needed)"
+            else
+              echo "⚠️ Check deployment job had issues"
+            fi
           else
-            echo "⚠️ No workers to deploy"
+            if [ "${{ needs.deploy.result }}" = "success" ]; then
+              echo "✅ All deployments successful!"
+            elif [ "${{ needs.deploy.result }}" = "failure" ]; then
+              echo "❌ Some deployments failed"
+              exit 1
+            elif [ "${{ needs.deploy.result }}" = "cancelled" ]; then
+              echo "⚠️ Deployments were cancelled"
+              exit 1
+            else
+              echo "⚠️ Deployment job was skipped"
+            fi
           fi
