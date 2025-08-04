@@ -1,23 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import whatsappLogo from "../../../../assets/logos/whatsapp-business.svg";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   getConnectionsQO,
   getAssistantQO,
 } from "../../../../../services/queries";
 import { authUserData } from "@/lib/auth-handler";
-import {
-  ArrowLeft,
-  Phone,
-  Bot,
-  Calendar,
-  CheckCircle,
-  Info,
-  InfoIcon,
-} from "lucide-react";
+import { ArrowLeft, Phone, Bot, Calendar, InfoIcon } from "lucide-react";
 
 export const Route = createFileRoute(
-  "/(console)/connections/organizational/whatsapp/"
+  "/(console)/connections/organizational/whatsapp/",
 )({
   loader: async ({ context: { queryClient, auth } }) => {
     const userData = await authUserData(auth);
@@ -34,7 +25,7 @@ export const Route = createFileRoute(
           },
         },
         userData,
-      })
+      }),
     );
 
     // Extraemos todos los assistantIds únicos de las subscriptions
@@ -57,9 +48,9 @@ export const Route = createFileRoute(
               },
             },
             userData,
-          })
-        )
-      )
+          }),
+        ),
+      ),
     );
 
     return { userData };
@@ -81,7 +72,7 @@ function RouteComponent() {
         },
       },
       userData,
-    })
+    }),
   );
 
   // Obtener datos de asistentes (ya están en cache por el prefetch)
@@ -102,8 +93,8 @@ function RouteComponent() {
           },
         },
         userData,
-      })
-    )
+      }),
+    ),
   );
 
   // Crear mapa de asistentes para fácil acceso
@@ -115,7 +106,7 @@ function RouteComponent() {
       }
       return acc;
     },
-    {} as Record<string, any>
+    {} as Record<string, any>,
   );
 
   const formatDate = (dateString: any) => {

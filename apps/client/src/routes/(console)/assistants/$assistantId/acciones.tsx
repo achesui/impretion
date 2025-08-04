@@ -10,7 +10,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ArrowLeft, X, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute(
-  "/(console)/assistants/$assistantId/acciones"
+  "/(console)/assistants/$assistantId/acciones",
 )({
   loader: async ({ context: { queryClient, auth }, params }) => {
     const userData = await authUserData(auth);
@@ -27,7 +27,7 @@ export const Route = createFileRoute(
           },
         },
         userData,
-      })
+      }),
     );
 
     return { assistantId, userData };
@@ -51,7 +51,7 @@ function RouteComponent() {
         },
       },
       userData,
-    })
+    }),
   );
 
   const { linkedActions } = assistant;
@@ -72,7 +72,7 @@ function RouteComponent() {
         data: {},
       },
       userData,
-    })
+    }),
   );
 
   // Obtener los tipos de acciones ya enlazadas
@@ -82,7 +82,7 @@ function RouteComponent() {
   // Filtrar las acciones disponibles excluyendo los tipos ya enlazados
   const availableActions =
     currentActions?.filter(
-      ({ action }) => !linkedActionTypes.includes(action.type)
+      ({ action }: { action: any }) => !linkedActionTypes.includes(action.type),
     ) || [];
 
   const assignNewAction = (actionId: string, actionType: string) => {
@@ -182,7 +182,7 @@ function RouteComponent() {
         </div>
         {availableActions && availableActions.length > 0 ? (
           <div className="p-2 rounded-md flex gap-2 flex-col">
-            {availableActions.map(({ action }) => {
+            {availableActions.map(({ action }: { action: any }) => {
               const schema =
                 actionSchemas[action.type as keyof typeof actionSchemas];
               const definitions = schema.renderer.metadata.definitions;

@@ -7,7 +7,7 @@ import { AppWindow, LogIn } from "lucide-react";
 
 // ¡REGLA DE ORO! Llama a createFileRoute() sin argumentos.
 export const Route = createFileRoute("/(public)")({
-  loader: async ({ context: { queryClient, auth } }) => {
+  loader: async ({ context: { auth } }) => {
     const userData = await authUserData(auth);
 
     return {

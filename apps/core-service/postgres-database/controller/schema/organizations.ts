@@ -1,22 +1,8 @@
-import {
-	bigint,
-	boolean,
-	decimal,
-	index,
-	integer,
-	jsonb,
-	pgEnum,
-	pgTable,
-	text,
-	timestamp,
-	uniqueIndex,
-	uuid,
-	varchar,
-} from 'drizzle-orm/pg-core';
+import { bigint, decimal, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core';
 import { assistants, linkedActions, linkedCollections } from './assistants';
 import { relations } from 'drizzle-orm';
 import { actions } from './actions';
-import { JsonActionResultsMetadata, JsonConnectionsMetadata } from '../json-schemas-validations';
+import { JsonConnectionsMetadata } from '../json-schemas-validations';
 
 export const organizationStatusEnum = pgEnum('organization_status', ['active', 'inactive', 'suspended']);
 export const connectionTypeEnum = pgEnum('connection_type', ['direct', 'organizational']);
@@ -69,7 +55,7 @@ export const collectionContent = pgTable(
 			.notNull()
 			.references(() => organizations.id, { onDelete: 'cascade' }),
 	},
-	(table) => [uniqueIndex('collection_content_key_idx').on(table.key)]
+	(table) => [uniqueIndex('collection_content_key_idx').on(table.key)],
 );
 
 export const connections = pgTable(
@@ -91,7 +77,7 @@ export const connections = pgTable(
 	(table) => [
 		index('connections_user_id_provider_idx').on(table.createdBy, table.provider),
 		index('connections_organization_id_type_idx').on(table.organizationId, table.type),
-	]
+	],
 );
 
 export const connectionSubscriptions = pgTable(
@@ -113,7 +99,7 @@ export const connectionSubscriptions = pgTable(
 		index('cs_action_idx').on(table.actionId),
 		uniqueIndex('unique_action_per_connection').on(table.connectionId, table.actionId),
 		uniqueIndex('unique_assistant_per_connection').on(table.connectionId, table.assistantId),
-	]
+	],
 );
 
 export const users = pgTable(
@@ -127,7 +113,7 @@ export const users = pgTable(
 			.notNull()
 			.references(() => organizations.id, { onDelete: 'cascade' }),
 	},
-	(table) => [uniqueIndex('users_email_idx').on(table.email)]
+	(table) => [uniqueIndex('users_email_idx').on(table.email)],
 );
 
 export const integrations = pgTable(
@@ -152,7 +138,7 @@ export const integrations = pgTable(
 	(table) => [
 		uniqueIndex('integrations_user_id_service_idx').on(table.userId, table.service),
 		index('integrations_expires_at_idx').on(table.expiresAt),
-	]
+	],
 );
 
 export const balances = pgTable(
@@ -169,7 +155,7 @@ export const balances = pgTable(
 			.unique()
 			.references(() => organizations.id, { onDelete: 'cascade' }),
 	},
-	(table) => [uniqueIndex('balances_organization_id_idx').on(table.organizationId)]
+	(table) => [uniqueIndex('balances_organization_id_idx').on(table.organizationId)],
 );
 
 export const balanceTransactions = pgTable(
@@ -219,7 +205,7 @@ export const balanceTransactions = pgTable(
 	(table) => [
 		index('balance_transactions_organization_id_created_at_idx').on(table.organizationId, table.createdAt),
 		index('balance_transactions_org_type_created_idx').on(table.organizationId, table.type, table.createdAt),
-	]
+	],
 );
 
 // ========= RELATIONS =========

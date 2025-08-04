@@ -1,6 +1,6 @@
 // Tipos generales
 
-import { UserData } from '../../../global';
+import { UserData } from '@base/shared-types';
 import { ActionQueryProps } from './actions/actions.d.types';
 import { AssistantQueryProps } from './assistants/assistants.d.types';
 import { ConnectionQueryProps } from './connections/connections.d.types';

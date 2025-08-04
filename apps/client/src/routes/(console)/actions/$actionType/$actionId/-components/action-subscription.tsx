@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { AlertCircle, CheckCircle2, Wifi } from "lucide-react";
-import type { UserData } from "../../../../../../../../global";
+import { UserData } from "@base/shared-types";
 
 interface FormData {
   isConnected: boolean;
@@ -42,7 +42,7 @@ export default function ActionSubscription({
   const directConnection = connections?.[0] ?? null;
   const isSubscribed =
     directConnection?.subscriptions?.some(
-      (subscription) => subscription.actionId === actionId
+      (subscription) => subscription.actionId === actionId,
     ) ?? false;
 
   // Form setup

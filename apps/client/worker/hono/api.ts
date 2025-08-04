@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { ServiceResponse } from "../../../global";
+import { ServiceResponse } from "@base/shared-types";
 
 export const app = new Hono<{ Bindings: Env }>();
 
@@ -12,7 +12,7 @@ app.use(
     allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-  })
+  }),
 );
 
 app.get("/api/test-webhook", (c) => {

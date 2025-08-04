@@ -208,6 +208,9 @@ importers:
 
   apps/core-service:
     dependencies:
+      '@base/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@neondatabase/serverless':
         specifier: 1.0.1
         version: 1.0.1

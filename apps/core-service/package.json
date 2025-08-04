@@ -34,6 +34,7 @@
 		"jose": "6.0.11",
 		"lodash": "4.17.21",
 		"postgres": "3.4.7",
-		"zod": "3.25.67"
+		"zod": "3.25.67",
+		"@base/shared-types": "workspace:*"
 	}
 }
