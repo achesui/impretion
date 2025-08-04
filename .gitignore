@@ -219,3 +219,5 @@ web_modules/
 # Yarn Integrity file
 
 .yarn-integrity
+
+.tanstack
