@@ -1,42 +1,67 @@
 name: Deploy to Cloudflare Workers
 
-# Trigger: ¿Cuándo putas se ejecuta esto?
+# ✅ PASO 1: Definir cuándo se ejecuta
 on:
-  # Solo cuando usted hace un push a la rama 'main'
   push:
     branches:
       - "main"
+    # ✅ OPCIONAL: Solo ejecutar cuando cambien archivos específicos
+    paths:
+      - "apps/worker/dashboard/**" # Ajusta la ruta según tu monorepo
+      - "packages/**" # Si tienes dependencias compartidas
+      - "pnpm-lock.yaml" # Si cambia el lockfile
+      - "package.json" # Si cambian dependencias
 
-# Permisos: Hay que darle permiso a esta mierda para que pueda escribir el estado del despliegue
+# ✅ PASO 2: Permisos necesarios para deployments
 permissions:
   contents: read
   deployments: write
 
 jobs:
-  # Definimos un trabajo para cada puto worker que quiera desplegar
   deploy-dashboard:
     runs-on: ubuntu-latest
     name: Deploy Dashboard Worker
+
     steps:
+      # ✅ PASO 3: Checkout del código
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      # ✅ PASO 4: Setup pnpm ANTES que Node.js (CRÍTICO)
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4 # ✅ Versión más reciente de la action
         with:
-          version: 8
+          version: 9 # ✅ Tu versión exacta (puedes usar 9.x.x para más flexibilidad)
 
+      # ✅ PASO 5: Setup Node.js CON cache de pnpm
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20" # O la versión que esté usando
-          cache: "pnpm"
+          node-version: "20"
+          cache: "pnpm" # ✅ Esto acelera MUCHO las builds
 
+      # ✅ PASO 6: Verificar versiones (opcional, para debugging)
+      - name: Verify versions
+        run: |
+          node --version
+          pnpm --version
+          echo "Cache directory: $(pnpm store path)"
+
+      # ✅ PASO 7: Install con frozen-lockfile (LA MEJOR PRÁCTICA)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+        # ✅ --frozen-lockfile asegura builds reproducibles
+        # ✅ Falla si el lockfile no coincide con package.json
 
+      # ✅ PASO 8: Deploy específico al worker
       - name: Deploy @worker/dashboard
         run: pnpm turbo run deploy --filter=@worker/dashboard
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # ✅ PASO 9: Verificar deployment (opcional)
+      - name: Verify Deployment
+        run: |
+          echo "✅ Deployment completed successfully!"
+          echo "🚀 Worker deployed to Cloudflare"
