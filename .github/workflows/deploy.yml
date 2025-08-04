@@ -1,0 +1,42 @@
+name: Deploy to Cloudflare Workers
+
+# Trigger: ¿Cuándo putas se ejecuta esto?
+on:
+  # Solo cuando usted hace un push a la rama 'main'
+  push:
+    branches:
+      - "main"
+
+# Permisos: Hay que darle permiso a esta mierda para que pueda escribir el estado del despliegue
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  # Definimos un trabajo para cada puto worker que quiera desplegar
+  deploy-dashboard:
+    runs-on: ubuntu-latest
+    name: Deploy Dashboard Worker
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # O la versión que esté usando
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Deploy @worker/dashboard
+        run: pnpm turbo run deploy --filter=@worker/dashboard
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
