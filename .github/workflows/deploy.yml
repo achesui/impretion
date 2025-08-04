@@ -3,23 +3,66 @@ name: Deploy Workers
 on:
   push:
     branches: [main]
-    paths:
-      - "apps/**"
-      - "packages/**"
-      - "turbo.json"
-      - "package.json"
-      - "pnpm-lock.yaml"
+  workflow_dispatch:
 
 permissions:
   contents: read
   deployments: write
 
 jobs:
+  # Detectar cambios
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      core-service: ${{ steps.changes.outputs.core-service }}
+      apis-gateway: ${{ steps.changes.outputs.apis-gateway }}
+      channel-services: ${{ steps.changes.outputs.channel-services }}
+      client: ${{ steps.changes.outputs.client }}
+      consumer-billing-balance: ${{ steps.changes.outputs.consumer-billing-balance }}
+      crypto-service: ${{ steps.changes.outputs.crypto-service }}
+      etl-log-processor: ${{ steps.changes.outputs.etl-log-processor }}
+      generator: ${{ steps.changes.outputs.generator }}
+      integrations-gateway: ${{ steps.changes.outputs.integrations-gateway }}
+      producer-billing-orchestrator: ${{ steps.changes.outputs.producer-billing-orchestrator }}
+      shared: ${{ steps.changes.outputs.shared }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            core-service:
+              - 'apps/core-service/**'
+            apis-gateway:
+              - 'apps/apis-gateway/**'
+            channel-services:
+              - 'apps/channel-services/**'
+            client:
+              - 'apps/client/**'
+            consumer-billing-balance:
+              - 'apps/consumer-billing-balance/**'
+            crypto-service:
+              - 'apps/crypto-service/**'
+            etl-log-processor:
+              - 'apps/etl-log-processor/**'
+            generator:
+              - 'apps/generator/**'
+            integrations-gateway:
+              - 'apps/integrations-gateway/**'
+            producer-billing-orchestrator:
+              - 'apps/producer-billing-orchestrator/**'
+            shared:
+              - 'packages/**'
+              - 'turbo.json'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+
   # Core Service
   deploy-core-service:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.core-service == 'true' || needs.detect-changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: contains(github.event.head_commit.modified, 'apps/core-service/') || contains(github.event.head_commit.added, 'apps/core-service/') || contains(github.event.head_commit.modified, 'packages/') || contains(github.event.head_commit.added, 'packages/')
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -36,9 +79,10 @@ jobs:
 
   # API Gateway
   deploy-apis-gateway:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.apis-gateway == 'true' || needs.detect-changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: contains(github.event.head_commit.modified, 'apps/apis-gateway/') || contains(github.event.head_commit.added, 'apps/apis-gateway/') || contains(github.event.head_commit.modified, 'packages/') || contains(github.event.head_commit.added, 'packages/')
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -55,9 +99,10 @@ jobs:
 
   # Channel Services
   deploy-channel-services:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.channel-services == 'true' || needs.detect-changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: contains(github.event.head_commit.modified, 'apps/channel-services/') || contains(github.event.head_commit.added, 'apps/channel-services/') || contains(github.event.head_commit.modified, 'packages/') || contains(github.event.head_commit.added, 'packages/')
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -74,9 +119,10 @@ jobs:
 
   # Client
   deploy-client:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.client == 'true' || needs.detect-changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: contains(github.event.head_commit.modified, 'apps/client/') || contains(github.event.head_commit.added, 'apps/client/') || contains(github.event.head_commit.modified, 'packages/') || contains(github.event.head_commit.added, 'packages/')
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -93,9 +139,10 @@ jobs:
 
   # Consumer Billing Balance
   deploy-consumer-billing-balance:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.consumer-billing-balance == 'true' || needs.detect-changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: contains(github.event.head_commit.modified, 'apps/consumer-billing-balance/') || contains(github.event.head_commit.added, 'apps/consumer-billing-balance/') || contains(github.event.head_commit.modified, 'packages/') || contains(github.event.head_commit.added, 'packages/')
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -112,9 +159,10 @@ jobs:
 
   # Crypto Service
   deploy-crypto-service:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.crypto-service == 'true' || needs.detect-changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: contains(github.event.head_commit.modified, 'apps/crypto-service/') || contains(github.event.head_commit.added, 'apps/crypto-service/') || contains(github.event.head_commit.modified, 'packages/') || contains(github.event.head_commit.added, 'packages/')
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -131,9 +179,10 @@ jobs:
 
   # ETL Log Processor
   deploy-etl-log-processor:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.etl-log-processor == 'true' || needs.detect-changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: contains(github.event.head_commit.modified, 'apps/etl-log-processor/') || contains(github.event.head_commit.added, 'apps/etl-log-processor/') || contains(github.event.head_commit.modified, 'packages/') || contains(github.event.head_commit.added, 'packages/')
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -150,9 +199,10 @@ jobs:
 
   # Generator
   deploy-generator:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.generator == 'true' || needs.detect-changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: contains(github.event.head_commit.modified, 'apps/generator/') || contains(github.event.head_commit.added, 'apps/generator/') || contains(github.event.head_commit.modified, 'packages/') || contains(github.event.head_commit.added, 'packages/')
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -169,9 +219,10 @@ jobs:
 
   # Integrations Gateway
   deploy-integrations-gateway:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.integrations-gateway == 'true' || needs.detect-changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: contains(github.event.head_commit.modified, 'apps/integrations-gateway/') || contains(github.event.head_commit.added, 'apps/integrations-gateway/') || contains(github.event.head_commit.modified, 'packages/') || contains(github.event.head_commit.added, 'packages/')
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -188,9 +239,10 @@ jobs:
 
   # Producer Billing Orchestrator
   deploy-producer-billing-orchestrator:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.producer-billing-orchestrator == 'true' || needs.detect-changes.outputs.shared == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: contains(github.event.head_commit.modified, 'apps/producer-billing-orchestrator/') || contains(github.event.head_commit.added, 'apps/producer-billing-orchestrator/') || contains(github.event.head_commit.modified, 'packages/') || contains(github.event.head_commit.added, 'packages/')
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
