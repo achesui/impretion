@@ -3,7 +3,17 @@ name: Monorepo Workers Deployment
 on:
   push:
     branches: [main]
-  workflow_dispatch: # Permite trigger manual
+  workflow_dispatch:
+    inputs:
+      workers:
+        description: "Workers to deploy (comma separated) or leave empty for auto-detect"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+  deployments: write
 
 jobs:
   detect-changes:
@@ -11,33 +21,88 @@ jobs:
     outputs:
       workers: ${{ steps.changes.outputs.workers }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # Necesario para git diff
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - id: changes
         run: |
-          # Script que detecta workers cambiados dinámicamente
-          CHANGED_WORKERS=$(node scripts/detect-changed-workers.js)
-          echo "workers=$CHANGED_WORKERS" >> $GITHUB_OUTPUT
+          # Si es manual, usar los workers especificados
+          if [ "${{ github.event.inputs.workers }}" != "" ]; then
+            if [ "${{ github.event.inputs.workers }}" = "all" ]; then
+              # Listar todos los workers
+              WORKERS=$(ls apps/ | jq -R -s -c 'split("\n")[:-1]')
+            else
+              # Convertir string separado por comas a JSON array
+              WORKERS=$(echo "${{ github.event.inputs.workers }}" | tr ',' '\n' | jq -R -s -c 'split("\n")[:-1]')
+            fi
+            echo "Manual workers selected: $WORKERS"
+          else
+            # Auto-detectar cambios
+            echo "🔍 Auto-detecting changed workers..."
+            WORKERS=$(node .github/scripts/detect-changed-workers.js)
+            echo "Auto-detected workers: $WORKERS"
+          fi
+
+          echo "workers=$WORKERS" >> $GITHUB_OUTPUT
 
   deploy:
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: needs.detect-changes.outputs.workers != '[]'
+    if: needs.detect-changes.outputs.workers != '[]' && needs.detect-changes.outputs.workers != ''
     strategy:
       matrix:
         worker: ${{ fromJSON(needs.detect-changes.outputs.workers) }}
-      fail-fast: false # No para todos si uno falla
+      fail-fast: false # Continúa aunque un worker falle
+      max-parallel: 3 # No más de 3 deploys simultáneos
+    timeout-minutes: 20
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 8
-      - uses: actions/setup-node@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "pnpm"
-      - run: pnpm install --frozen-lockfile
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Deploy ${{ matrix.worker }}
         run: pnpm turbo run deploy --filter=@worker/${{ matrix.worker }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Success!
+        run: echo "✅ ${{ matrix.worker }} deployed successfully ✅"
+
+  summary:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, deploy]
+    if: always()
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "🚀 Deployment Summary"
+          echo "Workers: ${{ needs.detect-changes.outputs.workers }}"
+
+          if [ "${{ needs.deploy.result }}" = "success" ]; then
+            echo "✅ All deployments successful!"
+          elif [ "${{ needs.deploy.result }}" = "failure" ]; then
+            echo "❌ Some deployments failed"
+            exit 1
+          else
+            echo "⚠️ No workers to deploy"
+          fi
