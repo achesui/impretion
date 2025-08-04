@@ -38,7 +38,7 @@ jobs:
             channel-services:
               - 'apps/channel-services/**'
             client:
-              - 'apps/client/**'
+              - 'apps/dashboard/**'
             consumer-billing-balance:
               - 'apps/consumer-billing-balance/**'
             crypto-service:
@@ -131,7 +131,7 @@ jobs:
           node-version: "20"
           cache: "pnpm"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm turbo run deploy --filter=@worker/client
+      - run: pnpm turbo run deploy --filter=@worker/dashboard
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
