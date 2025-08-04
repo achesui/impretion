@@ -1,18 +1,12 @@
-name: Deploy to Cloudflare Workers
+# .github/workflows/deploy-dashboard.yml
 
-# ✅ PASO 1: Definir cuándo se ejecuta
+name: Deploy Dashboard Worker
+
 on:
   push:
     branches:
-      - "main"
-    # ✅ OPCIONAL: Solo ejecutar cuando cambien archivos específicos
-    # paths:
-    #   - "apps/worker/dashboard/**"
-    #   - "packages/**"
-    #   - "pnpm-lock.yaml"
-    #   - "package.json"
+      - main
 
-# ✅ PASO 2: Permisos necesarios para deployments
 permissions:
   contents: read
   deployments: write
@@ -20,46 +14,34 @@ permissions:
 jobs:
   deploy-dashboard:
     runs-on: ubuntu-latest
-    name: Deploy Dashboard Worker
+    timeout-minutes: 20
 
     steps:
-      # ✅ PASO 3: Checkout del código
-      - name: Checkout Repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      # ✅ PASO 4: Setup pnpm ANTES que Node.js (CRÍTICO)
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # ✅ Versión más reciente de la action
+        uses: pnpm/action-setup@v4
+        with:
+          version: "9.x"
 
-      # ✅ PASO 5: Setup Node.js CON cache de pnpm
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "pnpm" # ✅ Esto acelera MUCHO las builds
+          cache: "pnpm"
 
-      # ✅ PASO 6: Verificar versiones (opcional, para debugging)
-      - name: Verify versions
-        run: |
-          node --version
-          pnpm --version
-          echo "Cache directory: $(pnpm store path)"
-
-      # ✅ PASO 7: Install con frozen-lockfile (LA MEJOR PRÁCTICA)
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        # ✅ --frozen-lockfile asegura builds reproducibles
-        # ✅ Falla si el lockfile no coincide con package.json
 
-      # ✅ PASO 8: Deploy específico al worker
-      - name: Deploy @worker/dashboard
+      # TURBO BUILD YA ES TASK DEPENDENCIA DE DEPLOY en tu turbo.json,
+      # por eso no necesitas 'pnpm turbo run build'
+      - name: Deploy Dashboard Worker with Turbo
         run: pnpm turbo run deploy --filter=@worker/dashboard
         env:
+          # el secreto tiene que estar definido como "Repository secret"
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      # ✅ PASO 9: Verificar deployment (opcional)
-      - name: Verify Deployment
-        run: |
-          echo "✅ Deployment completed successfully!"
-          echo "🚀 Worker deployed to Cloudflare"
+      - name: Success!
+        run: echo "✅ Dashboard Worker desplegado correctamente ✅"
