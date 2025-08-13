@@ -35,10 +35,10 @@ import { Route as consoleActionsActionTypeIndexRouteImport } from './routes/(con
 import { Route as consoleAssistantsAssistantIdPromptRouteImport } from './routes/(console)/assistants/$assistantId/prompt'
 import { Route as consoleAssistantsAssistantIdConfiguracionRouteImport } from './routes/(console)/assistants/$assistantId/configuracion'
 import { Route as consoleAssistantsAssistantIdAccionesRouteImport } from './routes/(console)/assistants/$assistantId/acciones'
-import { Route as consoleConnectionsOrganizationalWhatsappIndexRouteImport } from './routes/(console)/connections/organizational/whatsapp/index'
-import { Route as consoleConnectionsIntegrationsCalendlyIndexRouteImport } from './routes/(console)/connections/integrations/calendly/index'
+import { Route as consoleConnectionsOrganizationalWebsiteIndexRouteImport } from './routes/(console)/connections/organizational/website/index'
+import { Route as consoleConnectionsIntegrationsServiceIndexRouteImport } from './routes/(console)/connections/integrations/$service/index'
 import { Route as consoleActionsActionTypeActionIdIndexRouteImport } from './routes/(console)/actions/$actionType/$actionId/index'
-import { Route as consoleConnectionsOrganizationalWhatsappCreateIndexRouteImport } from './routes/(console)/connections/organizational/whatsapp/create/index'
+import { Route as consoleConnectionsOrganizationalWebsiteConnectionIdIndexRouteImport } from './routes/(console)/connections/organizational/website/$connectionId/index'
 
 const LayoutRoute = LayoutRouteImport.update({
   id: '/layout',
@@ -183,16 +183,16 @@ const consoleAssistantsAssistantIdAccionesRoute =
     path: '/acciones',
     getParentRoute: () => consoleAssistantsAssistantIdRouteRoute,
   } as any)
-const consoleConnectionsOrganizationalWhatsappIndexRoute =
-  consoleConnectionsOrganizationalWhatsappIndexRouteImport.update({
-    id: '/organizational/whatsapp/',
-    path: '/organizational/whatsapp/',
+const consoleConnectionsOrganizationalWebsiteIndexRoute =
+  consoleConnectionsOrganizationalWebsiteIndexRouteImport.update({
+    id: '/organizational/website/',
+    path: '/organizational/website/',
     getParentRoute: () => consoleConnectionsRouteRoute,
   } as any)
-const consoleConnectionsIntegrationsCalendlyIndexRoute =
-  consoleConnectionsIntegrationsCalendlyIndexRouteImport.update({
-    id: '/integrations/calendly/',
-    path: '/integrations/calendly/',
+const consoleConnectionsIntegrationsServiceIndexRoute =
+  consoleConnectionsIntegrationsServiceIndexRouteImport.update({
+    id: '/integrations/$service/',
+    path: '/integrations/$service/',
     getParentRoute: () => consoleConnectionsRouteRoute,
   } as any)
 const consoleActionsActionTypeActionIdIndexRoute =
@@ -201,10 +201,10 @@ const consoleActionsActionTypeActionIdIndexRoute =
     path: '/actions/$actionType/$actionId/',
     getParentRoute: () => consoleRouteRoute,
   } as any)
-const consoleConnectionsOrganizationalWhatsappCreateIndexRoute =
-  consoleConnectionsOrganizationalWhatsappCreateIndexRouteImport.update({
-    id: '/organizational/whatsapp/create/',
-    path: '/organizational/whatsapp/create/',
+const consoleConnectionsOrganizationalWebsiteConnectionIdIndexRoute =
+  consoleConnectionsOrganizationalWebsiteConnectionIdIndexRouteImport.update({
+    id: '/organizational/website/$connectionId/',
+    path: '/organizational/website/$connectionId/',
     getParentRoute: () => consoleConnectionsRouteRoute,
   } as any)
 
@@ -234,9 +234,9 @@ export interface FileRoutesByFullPath {
   '/connections/organizational': typeof consoleConnectionsOrganizationalIndexRoute
   '/knowledge-base/$collectionId': typeof consoleKnowledgeBaseCollectionIdIndexRoute
   '/actions/$actionType/$actionId': typeof consoleActionsActionTypeActionIdIndexRoute
-  '/connections/integrations/calendly': typeof consoleConnectionsIntegrationsCalendlyIndexRoute
-  '/connections/organizational/whatsapp': typeof consoleConnectionsOrganizationalWhatsappIndexRoute
-  '/connections/organizational/whatsapp/create': typeof consoleConnectionsOrganizationalWhatsappCreateIndexRoute
+  '/connections/integrations/$service': typeof consoleConnectionsIntegrationsServiceIndexRoute
+  '/connections/organizational/website': typeof consoleConnectionsOrganizationalWebsiteIndexRoute
+  '/connections/organizational/website/$connectionId': typeof consoleConnectionsOrganizationalWebsiteConnectionIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof publicIndexRoute
@@ -262,9 +262,9 @@ export interface FileRoutesByTo {
   '/connections/organizational': typeof consoleConnectionsOrganizationalIndexRoute
   '/knowledge-base/$collectionId': typeof consoleKnowledgeBaseCollectionIdIndexRoute
   '/actions/$actionType/$actionId': typeof consoleActionsActionTypeActionIdIndexRoute
-  '/connections/integrations/calendly': typeof consoleConnectionsIntegrationsCalendlyIndexRoute
-  '/connections/organizational/whatsapp': typeof consoleConnectionsOrganizationalWhatsappIndexRoute
-  '/connections/organizational/whatsapp/create': typeof consoleConnectionsOrganizationalWhatsappCreateIndexRoute
+  '/connections/integrations/$service': typeof consoleConnectionsIntegrationsServiceIndexRoute
+  '/connections/organizational/website': typeof consoleConnectionsOrganizationalWebsiteIndexRoute
+  '/connections/organizational/website/$connectionId': typeof consoleConnectionsOrganizationalWebsiteConnectionIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -295,9 +295,9 @@ export interface FileRoutesById {
   '/(console)/connections/organizational/': typeof consoleConnectionsOrganizationalIndexRoute
   '/(console)/knowledge-base/$collectionId/': typeof consoleKnowledgeBaseCollectionIdIndexRoute
   '/(console)/actions/$actionType/$actionId/': typeof consoleActionsActionTypeActionIdIndexRoute
-  '/(console)/connections/integrations/calendly/': typeof consoleConnectionsIntegrationsCalendlyIndexRoute
-  '/(console)/connections/organizational/whatsapp/': typeof consoleConnectionsOrganizationalWhatsappIndexRoute
-  '/(console)/connections/organizational/whatsapp/create/': typeof consoleConnectionsOrganizationalWhatsappCreateIndexRoute
+  '/(console)/connections/integrations/$service/': typeof consoleConnectionsIntegrationsServiceIndexRoute
+  '/(console)/connections/organizational/website/': typeof consoleConnectionsOrganizationalWebsiteIndexRoute
+  '/(console)/connections/organizational/website/$connectionId/': typeof consoleConnectionsOrganizationalWebsiteConnectionIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -327,9 +327,9 @@ export interface FileRouteTypes {
     | '/connections/organizational'
     | '/knowledge-base/$collectionId'
     | '/actions/$actionType/$actionId'
-    | '/connections/integrations/calendly'
-    | '/connections/organizational/whatsapp'
-    | '/connections/organizational/whatsapp/create'
+    | '/connections/integrations/$service'
+    | '/connections/organizational/website'
+    | '/connections/organizational/website/$connectionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -355,9 +355,9 @@ export interface FileRouteTypes {
     | '/connections/organizational'
     | '/knowledge-base/$collectionId'
     | '/actions/$actionType/$actionId'
-    | '/connections/integrations/calendly'
-    | '/connections/organizational/whatsapp'
-    | '/connections/organizational/whatsapp/create'
+    | '/connections/integrations/$service'
+    | '/connections/organizational/website'
+    | '/connections/organizational/website/$connectionId'
   id:
     | '__root__'
     | '/(console)'
@@ -387,9 +387,9 @@ export interface FileRouteTypes {
     | '/(console)/connections/organizational/'
     | '/(console)/knowledge-base/$collectionId/'
     | '/(console)/actions/$actionType/$actionId/'
-    | '/(console)/connections/integrations/calendly/'
-    | '/(console)/connections/organizational/whatsapp/'
-    | '/(console)/connections/organizational/whatsapp/create/'
+    | '/(console)/connections/integrations/$service/'
+    | '/(console)/connections/organizational/website/'
+    | '/(console)/connections/organizational/website/$connectionId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -584,18 +584,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof consoleAssistantsAssistantIdAccionesRouteImport
       parentRoute: typeof consoleAssistantsAssistantIdRouteRoute
     }
-    '/(console)/connections/organizational/whatsapp/': {
-      id: '/(console)/connections/organizational/whatsapp/'
-      path: '/organizational/whatsapp'
-      fullPath: '/connections/organizational/whatsapp'
-      preLoaderRoute: typeof consoleConnectionsOrganizationalWhatsappIndexRouteImport
+    '/(console)/connections/organizational/website/': {
+      id: '/(console)/connections/organizational/website/'
+      path: '/organizational/website'
+      fullPath: '/connections/organizational/website'
+      preLoaderRoute: typeof consoleConnectionsOrganizationalWebsiteIndexRouteImport
       parentRoute: typeof consoleConnectionsRouteRoute
     }
-    '/(console)/connections/integrations/calendly/': {
-      id: '/(console)/connections/integrations/calendly/'
-      path: '/integrations/calendly'
-      fullPath: '/connections/integrations/calendly'
-      preLoaderRoute: typeof consoleConnectionsIntegrationsCalendlyIndexRouteImport
+    '/(console)/connections/integrations/$service/': {
+      id: '/(console)/connections/integrations/$service/'
+      path: '/integrations/$service'
+      fullPath: '/connections/integrations/$service'
+      preLoaderRoute: typeof consoleConnectionsIntegrationsServiceIndexRouteImport
       parentRoute: typeof consoleConnectionsRouteRoute
     }
     '/(console)/actions/$actionType/$actionId/': {
@@ -605,11 +605,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof consoleActionsActionTypeActionIdIndexRouteImport
       parentRoute: typeof consoleRouteRoute
     }
-    '/(console)/connections/organizational/whatsapp/create/': {
-      id: '/(console)/connections/organizational/whatsapp/create/'
-      path: '/organizational/whatsapp/create'
-      fullPath: '/connections/organizational/whatsapp/create'
-      preLoaderRoute: typeof consoleConnectionsOrganizationalWhatsappCreateIndexRouteImport
+    '/(console)/connections/organizational/website/$connectionId/': {
+      id: '/(console)/connections/organizational/website/$connectionId/'
+      path: '/organizational/website/$connectionId'
+      fullPath: '/connections/organizational/website/$connectionId'
+      preLoaderRoute: typeof consoleConnectionsOrganizationalWebsiteConnectionIdIndexRouteImport
       parentRoute: typeof consoleConnectionsRouteRoute
     }
   }
@@ -619,9 +619,9 @@ interface consoleConnectionsRouteRouteChildren {
   consoleConnectionsDirectIndexRoute: typeof consoleConnectionsDirectIndexRoute
   consoleConnectionsIntegrationsIndexRoute: typeof consoleConnectionsIntegrationsIndexRoute
   consoleConnectionsOrganizationalIndexRoute: typeof consoleConnectionsOrganizationalIndexRoute
-  consoleConnectionsIntegrationsCalendlyIndexRoute: typeof consoleConnectionsIntegrationsCalendlyIndexRoute
-  consoleConnectionsOrganizationalWhatsappIndexRoute: typeof consoleConnectionsOrganizationalWhatsappIndexRoute
-  consoleConnectionsOrganizationalWhatsappCreateIndexRoute: typeof consoleConnectionsOrganizationalWhatsappCreateIndexRoute
+  consoleConnectionsIntegrationsServiceIndexRoute: typeof consoleConnectionsIntegrationsServiceIndexRoute
+  consoleConnectionsOrganizationalWebsiteIndexRoute: typeof consoleConnectionsOrganizationalWebsiteIndexRoute
+  consoleConnectionsOrganizationalWebsiteConnectionIdIndexRoute: typeof consoleConnectionsOrganizationalWebsiteConnectionIdIndexRoute
 }
 
 const consoleConnectionsRouteRouteChildren: consoleConnectionsRouteRouteChildren =
@@ -631,12 +631,12 @@ const consoleConnectionsRouteRouteChildren: consoleConnectionsRouteRouteChildren
       consoleConnectionsIntegrationsIndexRoute,
     consoleConnectionsOrganizationalIndexRoute:
       consoleConnectionsOrganizationalIndexRoute,
-    consoleConnectionsIntegrationsCalendlyIndexRoute:
-      consoleConnectionsIntegrationsCalendlyIndexRoute,
-    consoleConnectionsOrganizationalWhatsappIndexRoute:
-      consoleConnectionsOrganizationalWhatsappIndexRoute,
-    consoleConnectionsOrganizationalWhatsappCreateIndexRoute:
-      consoleConnectionsOrganizationalWhatsappCreateIndexRoute,
+    consoleConnectionsIntegrationsServiceIndexRoute:
+      consoleConnectionsIntegrationsServiceIndexRoute,
+    consoleConnectionsOrganizationalWebsiteIndexRoute:
+      consoleConnectionsOrganizationalWebsiteIndexRoute,
+    consoleConnectionsOrganizationalWebsiteConnectionIdIndexRoute:
+      consoleConnectionsOrganizationalWebsiteConnectionIdIndexRoute,
   }
 
 const consoleConnectionsRouteRouteWithChildren =

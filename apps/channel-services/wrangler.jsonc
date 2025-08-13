@@ -15,15 +15,13 @@
       "binding": "CORE_SERVICE",
       "service": "core-service",
     },
-    /*
     {
       "binding": "GENERATOR_SERVICE",
-      "service": "generator"
+      "service": "generator",
     },
     {
       "binding": "CRYPTO_SERVICE",
-      "service": "crypto-service"
-    }
-    */
+      "service": "crypto-service",
+    },
   ],
 }

@@ -27,8 +27,8 @@ export const connectionHandlers: ConnectionHandlers = {
 				const cachedConnection = await cacheManager.get<GetConnectionResponse[]>({ key });
 				console.log('Cached connection obtained: ', cachedConnection);
 
-				if (cachedConnection && Array.isArray(cachedConnection) && cachedConnection.length > 0) {
-					return cachedConnection;
+				if (cachedConnection) {
+					return cachedConnection as GetConnectionResponse[];
 				}
 			} catch (error) {
 				console.error('Error getting from cache:', error);
@@ -42,7 +42,7 @@ export const connectionHandlers: ConnectionHandlers = {
 					userId ? eq(connections.createdBy, userId) : undefined,
 					filterByConnectedWith ? eq(connections.connectedWith, filterByConnectedWith) : undefined,
 					filterByMetadata ? createJsonbCondition(connections.metadata, filterByMetadata) : undefined,
-					type ? eq(connections.type, type as 'organizational' | 'direct') : undefined
+					type ? eq(connections.type, type as 'organizational' | 'direct') : undefined,
 				),
 				with: {
 					subscriptions: withSubscriptions ? true : undefined,
@@ -69,6 +69,7 @@ export const connectionHandlers: ConnectionHandlers = {
 		try {
 			const { organizationId, userId } = userData;
 			console.log('DATOS DEL USER => ', userData);
+			console.log('BLESSSSSSSH ', data);
 			const { type } = data;
 
 			if (!userId) throw new Error('Un usuario es requerido en la creación de las conexiones.');
@@ -102,6 +103,7 @@ export const connectionHandlers: ConnectionHandlers = {
 
 				console.log('WWWWWWWWW => ', data.organizationalData);
 				console.log('KKKKKKKK <<< -> ', organizationalData);
+				/*
 				const connection = await db.transaction(async (tx) => {
 					const [connection] = await tx
 						.insert(connections)
@@ -121,7 +123,7 @@ export const connectionHandlers: ConnectionHandlers = {
 							organizationId,
 						})
 						.returning();
-					console.log('subccccccc ', subc);
+					console.log('SUBS CONNECTION SUBSCRIPTIONS ', subc);
 					return connection;
 				});
 
@@ -136,13 +138,14 @@ export const connectionHandlers: ConnectionHandlers = {
 								id: connection.id,
 								type: 'organizational',
 							},
-							userData
+							userData,
 						);
 					} catch (error) {
 						console.error('Failed to delete organization from Auth0:', error);
 					}
 				});
 
+				console.log('org data => ', organizationalData);
 				const connectionFlowResponse = await env.CHANNEL_SERVICES.organizationalConnectionFlow({
 					provider: 'twilio',
 					data: organizationalData as any,
@@ -155,16 +158,16 @@ export const connectionHandlers: ConnectionHandlers = {
 				if (!connectionFlowResponse.success) {
 					throw new Error('Ha ocurrido un error en el flujo de conexión organizacional.');
 				}
-
 				newConnection = connection;
+				*/
 			} else {
 				throw new Error('Invalid connection type.');
 			}
 
 			// Actualizar cache con la nueva conexión
-			await updateConnectionCache(newConnection, env);
+			//await updateConnectionCache(newConnection, env);
 
-			return newConnection;
+			return 'newConnection';
 		} catch (error) {
 			await saga.cancel();
 			console.error('Error in createConnection:', error);
@@ -194,9 +197,22 @@ export const connectionHandlers: ConnectionHandlers = {
 			// Invalidamos el cache de la conexión anterior
 			await invalidateConnectionCache(currentConnection.connectedWith, env);
 
+			// Preparamos los datos para la actualización
+			const updateData = { ...data };
+
+			// Si hay metadata, hacemos merge con la metadata existente
+			if (data.metadata && currentConnection.metadata) {
+				// Opción 1: Merge en JavaScript (recomendado para control completo)
+				updateData.metadata = {
+					...currentConnection.metadata,
+					...data.metadata,
+				};
+			}
+
+			// Opción 3: Usando el approach de JavaScript (más simple y controlable)
 			const [updatedConnection] = await db
 				.update(connections)
-				.set(data)
+				.set(updateData as any)
 				.where(and(eq(connections.id, data.id), eq(connections.organizationId, organizationId)))
 				.returning();
 

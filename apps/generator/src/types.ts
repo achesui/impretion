@@ -1,18 +1,40 @@
 import { SelectConnectionSubscriptionsSchema } from "@core-service/types";
 import { Schedule } from "agents";
 
+// Ejecuta una consulta SQL desde un Durable Object es el bind 'this.sql'
+export type DurableObjectSQL = <
+  T = Record<string, string | number | boolean | null>,
+>(
+  strings: TemplateStringsArray,
+  ...values: (string | number | boolean | null)[]
+) => T[];
+
+// Programa una tarea para que se ejecute en el futuro, es "Alarms" de los DO.
+type DurableObjectSchedule<TAgentContext> = <T = string>(
+  when: Date | string | number,
+  callback: keyof TAgentContext,
+  payload?: T,
+) => Promise<Schedule<T>>;
+
+// Timestamps de los mensajes enviados.
+export type Timestamps = {
+  userMessageTimestamp: Date;
+  assistantMessageTimestamp: Date;
+};
+
 export type UserData = { organizationId: string; userId?: string };
+
+export type GetDataProps = {
+  from: string;
+};
 
 /* CHAT COMPLETION */
 export type ChatCompletionsHelpers<TAgentContext> = {
-  schedule: <T = string>(
-    when: Date | string | number,
-    callback: keyof TAgentContext,
-    payload?: T
-  ) => Promise<Schedule<T>>;
+  schedule: DurableObjectSchedule<TAgentContext>;
   cancelSchedule: (id: string) => Promise<boolean>;
   state: UserMessageState;
   setState: (state: UserMessageState) => void;
+  sql: DurableObjectSQL;
 };
 
 export type ChatCompletionProps<TAgentContext> = {
@@ -50,8 +72,10 @@ export type GenerationProps = {
   connectionType: ConnectionTypes;
   userData: UserData;
   source: string;
+  // Subscripciones de una generación, si se ejecuta una acción se notifica a todos los suscritos.
   subscriptions: SelectConnectionSubscriptionsSchema[];
   message: string;
+  timestamp: Date;
   to: string;
   from: string;
   isInternal: boolean;
@@ -66,7 +90,18 @@ export type ProcessGenerationProps = {
   isInternal: boolean;
 };
 
-export type GenerationResponse = { content: string; model: string };
+export type GenerationResponse = {
+  content: string;
+  model: string;
+  timestamps: Timestamps;
+};
+
+// Mensaje individual de conversacion
+export type ConversationMessage = {
+  role: string;
+  content: string;
+  timestamp: Date;
+};
 
 export type AIGatewayMetadata = {
   userData: UserData;
@@ -328,8 +363,24 @@ type ActionData = {
 
 /** ACTION STATES **/
 // Se encarga del almacenamiento de cada acción según las peticiones del usuario.
+
+/**
+ * OrderState representa una acción de orden. Una orden en resumen es la compra de un producto o servicio.
+ * transactions: Transacciones que ha realizado el usuario - Únicamente se almacenan las transacciones exitosas y el ID del actionResult referente a esta orden.
+ * interestedProducts: Son los productos que el usuario ha seleccionado para comprar - es un almacenamiento en cache de los productos en los que el usuario ha estado/esta interesado.
+ */
 type OrderState = {
-  currentOrder: number;
+  transactions: {
+    numberOfTransactions: number;
+    transactionsId: string[]; // Viene directamente del actionResult de la acción de la base de datos.
+  }[];
+  interestedProducts: {
+    name: string;
+    price: number;
+    description: string;
+    quantity: number;
+    image: string;
+  }[];
 };
 
 export type appointmentState = {
@@ -341,15 +392,20 @@ export type appointmentState = {
 };
 
 export type UserMessageState = {
-  // Contexto conversacional resumido y optimizado para soportar largas conversaciones.
-  conversationContext: {
-    role: string;
-    content: string;
-  }[];
-  // Conversación entera guardada para consulta.
-  fullConversationContext: {}[];
-  actionState?: {
-    appointments: appointmentState[];
+  // conversationContext y fullConversationContext se utilizan para almacenar el contexto de la conversación en SQL.
+  // Últimos 10 mensajes de la conversación para mostrar en UI.
+  lastConversationMessages: ConversationMessage[];
+
+  // Estado de la conversación como número de mensajes.
+  conversationState: {
+    messageCountForSummarization: number; // Cada 10 mensajes se hace un resumen.
+    messageCount: number; // Número total de mensajes en la conversación.
+  };
+
+  // Estados de las acciones que el usuario ha realizado/solicitado.
+  actionStates?: {
+    appointments?: appointmentState[];
+    orders?: OrderState[];
   };
 };
 
@@ -384,7 +440,7 @@ export type ScheduleHandlers = {
   appointmentReminder: (
     env: Env,
     data: AppointmentReminderParams,
-    source: string
+    source: string,
   ) => Promise<AppointmentReminderResponse>;
 };
 

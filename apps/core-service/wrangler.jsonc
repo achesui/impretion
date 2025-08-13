@@ -14,7 +14,6 @@
 			"localConnectionString": "postgres://org_user:achesui@localhost:5431/organizations_db",
 		},
 	],
-	/*
 	"services": [
 		{ "binding": "INTEGRATIONS_GATEWAY", "service": "integrations-gateway" },
 		{
@@ -26,7 +25,6 @@
 			"service": "channel-services",
 		},
 	],
-	*/
 	"d1_databases": [
 		{
 			"binding": "LOGS",

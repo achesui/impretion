@@ -1,7 +1,7 @@
 {
   "name": "@worker/integrations-gateway",
   "scripts": {
-    "dev": "wrangler dev --port 3003 --persist-to=../../shared-workers-data",
+    "dev": "wrangler dev --port 3008 --persist-to=../../shared-workers-data",
     "deploy": "wrangler deploy --minify",
     "cf-typegen": "wrangler types"
   },

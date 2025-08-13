@@ -10,9 +10,15 @@ import {
 import { revokeTokens } from "../lib/handlers/revoke-tokens";
 import { SelectIntegrationSchema } from "@core-service/types";
 import { ServiceResponse } from "@base/shared-types";
+import { hmacValidation } from "../lib/validations/hmac";
 
 export default class IntegrationsGateway extends WorkerEntrypoint<Env> {
   private app = new Hono<{ Bindings: Env }>();
+
+  constructor(ctx: ExecutionContext, env: Env) {
+    super(ctx, env);
+    this.setupRoutes();
+  }
 
   async fetch(request: Request): Promise<Response> {
     return this.app.fetch(request, this.env, this.ctx);
@@ -22,6 +28,8 @@ export default class IntegrationsGateway extends WorkerEntrypoint<Env> {
     params: GetTokensParams<T>,
     type: GetServiceType,
   ): Promise<ServiceResponse<SelectIntegrationSchema, any>> {
+    console.log("params => ", params);
+    console.log("type => ", type);
     return await generateTokens(this.env, params, type);
   }
 

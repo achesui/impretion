@@ -1,11 +1,11 @@
 import { GetConnectionResponse } from "@core-service/types";
-import { ServiceResponse } from "../../../../global";
 import {
   appointmentHandlers,
   defaultHandlers,
   verificationHandlers,
 } from "./templates";
 import type { SubaccountTokens, TemplateTypeProps } from "./twilio-types";
+import { ServiceResponse } from "@base/shared-types";
 
 const handlerMap: any = {
   appointments: appointmentHandlers,
@@ -15,7 +15,7 @@ const handlerMap: any = {
 
 export async function templateHandler(
   template: TemplateTypeProps,
-  env: Env
+  env: Env,
 ): Promise<ServiceResponse<string, string>> {
   try {
     const { category, type, data, from, to, connectionType } = template;
@@ -66,7 +66,7 @@ export async function templateHandler(
       data: any,
       subaccountTokens: SubaccountTokens,
       from: string,
-      to: string
+      to: string,
     ) => Promise<string>;
 
     const result = await handler(env, data, subaccountTokens, from, to);

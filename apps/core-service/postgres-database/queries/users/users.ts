@@ -33,7 +33,7 @@ export const userHandlers: UserHandlers = {
 									service: true,
 									metadata: true,
 								},
-						  }
+							}
 						: undefined,
 				},
 			});
@@ -45,27 +45,65 @@ export const userHandlers: UserHandlers = {
 		}
 	},
 
+	createIntegration: async (env, db, data, userData) => {
+		try {
+			const { userId, organizationId } = userData;
+			if (!userId) throw new Error();
+
+			const { service, ...integrationData } = data;
+
+			console.log('INTEGRATZAO -> ', service, integrationData);
+
+			const retrievedTokens = await env.INTEGRATIONS_GATEWAY.getTokens(
+				{
+					service: service as any,
+					data: {
+						...integrationData,
+					},
+				},
+				'generate',
+			);
+
+			if (!retrievedTokens.success) throw new Error();
+
+			const [newIntegration] = await db
+				.insert(integrations)
+				.values({
+					...retrievedTokens.data,
+					userId,
+					organizationId,
+				})
+				.returning();
+			if (!newIntegration) {
+				throw new Error('Failed to create integration.'); // Mensaje de error corregido
+			}
+			const { accessToken, refreshToken, ...integrationResponse } = newIntegration;
+			return integrationResponse;
+		} catch (error) {
+			throw error;
+		}
+	},
+
+	/*
 	createOrUpdateIntegration: async (env, db, data, userData) => {
 		try {
 			const { userId, organizationId } = userData;
+			console.log('VALUES VALORES =====> ', data.values);
 
 			if (!userId) throw new Error();
 
 			if (data.operation === 'create') {
 				const { service, ...integrationData } = data.values;
-				console.log('VALUES VALORES =====> ', data.values);
 
 				console.log('INTEGRATZAO -> ', service, integrationData);
 				const retrievedTokens = await env.INTEGRATIONS_GATEWAY.getTokens(
 					{
 						service: service as any,
 						data: {
-							code: integrationData.code || '',
-							redirect_uri: integrationData.redirectUri || '',
-							code_verifier: integrationData.codeVerifier || '',
+							...integrationData,
 						},
 					},
-					'generate'
+					'generate',
 				);
 
 				if (!retrievedTokens.success) throw new Error();
@@ -100,7 +138,7 @@ export const userHandlers: UserHandlers = {
 							refresh_token: integrationData.refreshToken || '',
 						},
 					},
-					'regenerate'
+					'regenerate',
 				);
 
 				if (!regeneratedTokens.success) {
@@ -140,6 +178,7 @@ export const userHandlers: UserHandlers = {
 			throw error;
 		}
 	},
+	 */
 
 	deleteUserIntegration: async (env, db, data, userData) => {
 		try {
@@ -181,7 +220,7 @@ export const userHandlers: UserHandlers = {
 const createOrUpdateIntegrationCache = async (
 	env: Env,
 	organizationId: string,
-	integration: SelectIntegrationSchema & { accessToken: string; refreshToken: string }
+	integration: SelectIntegrationSchema & { accessToken: string; refreshToken: string },
 ) => {
 	const { cacheKeyBuilder, cacheManager } = cacheHandler(env, organizationId);
 	const key = cacheKeyBuilder.entity({ name: 'integrations', identifier: integration.id }).build();

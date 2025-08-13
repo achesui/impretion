@@ -1,4 +1,3 @@
-import { ServiceResponse } from "../../../global";
 import {
   GetTokensParams,
   GenerateTokensHandler,
@@ -9,6 +8,8 @@ import {
   Auth0CachedManagementApiResponse,
 } from "../../types";
 import { SelectIntegrationSchema } from "@core-service/types";
+import { hmacValidation } from "../validations/hmac";
+import { ServiceResponse } from "@base/shared-types";
 
 const generateTokensHandler: GenerateTokensHandler = {
   /**
@@ -20,7 +21,7 @@ const generateTokensHandler: GenerateTokensHandler = {
     const cachedTokenData =
       await env.ACCESS_TOKENS.get<Auth0CachedManagementApiResponse>(
         "impretionAuth0ManagementAPI",
-        { type: "json" }
+        { type: "json" },
       );
 
     // Check if we have a valid cached token (expires more than 1 hour from now)
@@ -58,12 +59,12 @@ const generateTokensHandler: GenerateTokensHandler = {
           audience: "https://dev-xw3cts5yn7mqyar7.us.auth0.com/api/v2/",
           grant_type: "client_credentials",
         }),
-      }
+      },
     );
 
     if (!accessTokenResponse.ok) {
       throw new Error(
-        `Failed to get Auth0 token: ${accessTokenResponse.status} ${accessTokenResponse.statusText}`
+        `Failed to get Auth0 token: ${accessTokenResponse.status} ${accessTokenResponse.statusText}`,
       );
     }
 
@@ -87,7 +88,7 @@ const generateTokensHandler: GenerateTokensHandler = {
       JSON.stringify({
         accessToken: encryptedAccessTokenData,
         expiresAt: new Date(Date.now() + expires_in * 1000),
-      })
+      }),
     );
 
     const decryptedAccessTokenResponse =
@@ -109,7 +110,7 @@ const generateTokensHandler: GenerateTokensHandler = {
   calendly: async (
     env,
     data,
-    type
+    type,
   ): Promise<
     SelectIntegrationSchema & { accessToken: string; refreshToken: string }
   > => {
@@ -177,7 +178,7 @@ const generateTokensHandler: GenerateTokensHandler = {
             headers: {
               Authorization: `Bearer ${access_token}`,
             },
-          }
+          },
         );
         const { resource } = await getUserResponse.json<{
           resource: { email: string };
@@ -189,7 +190,7 @@ const generateTokensHandler: GenerateTokensHandler = {
             headers: {
               Authorization: `Bearer ${access_token}`,
             },
-          }
+          },
         );
 
         const yy = await getUserRole.json();
@@ -251,13 +252,13 @@ const generateTokensHandler: GenerateTokensHandler = {
                 token: decryptedRefreshToken.data,
                 client_secret: env.CALENDLY_CLIENT_SECRET,
               }),
-            }
+            },
           );
 
           const refreshTokenStatus = await response.json<Record<string, any>>();
           console.log(
             "ESTADO ACTUAL DEL REFRESH TOKEN ========> ",
-            refreshTokenStatus.active
+            refreshTokenStatus.active,
           );
 
           if (!refreshTokenStatus.active) {
@@ -316,12 +317,66 @@ const generateTokensHandler: GenerateTokensHandler = {
       throw error;
     }
   },
+
+  // Validación por HMAC - Únicamente retorna `access_token`
+  shopify: async (
+    env,
+    data,
+    type,
+  ): Promise<SelectIntegrationSchema & { accessToken: string }> => {
+    const secret = env.SHOPIFY_CLIENT_SECRET;
+
+    const { code, host, shop, state, timestamp, hmac } = data;
+
+    console.log("validacion =< ", code, host, shop, state, timestamp);
+    const message = new URLSearchParams({
+      code,
+      host,
+      shop,
+      state,
+      timestamp,
+    }).toString();
+
+    const isValidHmac = await hmacValidation({
+      secretKey: secret,
+      message,
+      hmac,
+    });
+
+    console.log("hmac valido -> ", isValidHmac);
+    if (!isValidHmac) throw new Error("HMAC validation failed");
+
+    const response = await fetch(`https://${shop}/admin/oauth/access_token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        client_id: env.SHOPIFY_CLIENT_ID,
+        client_secret: env.SHOPIFY_CLIENT_SECRET,
+        code,
+      }),
+    });
+
+    console.log("respuesa => ", response);
+    if (!response.ok) {
+      console.error(
+        "Ha ocurrido un error en la obtención del access token en Shopify",
+      );
+      throw new Error("Error obteniendo el access token");
+    }
+
+    const exchangeResponse = await response.json();
+    console.log("exchangeResponse ===> ", exchangeResponse);
+
+    return {
+      accessToken,
+    };
+  },
 };
 
 export async function generateTokens<T extends keyof ServiceTokenData>(
   env: Env,
   params: GetTokensParams<T>,
-  type: GetServiceType
+  type: GetServiceType,
 ): Promise<ServiceResponse<SelectIntegrationSchema, any>> {
   const { service, data } = params;
 

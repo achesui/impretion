@@ -19,7 +19,12 @@ export function NewRadioGroup({
       {items.map((item, index) => (
         <div key={item.value} className="flex items-center space-x-2">
           <RadioGroupItem value={item.value} id={`${item.value}-${index}`} />
-          <Label htmlFor={`${item.value}-${index}`}>{item.label}</Label>
+          <Label
+            className="text-text-primary"
+            htmlFor={`${item.value}-${index}`}
+          >
+            {item.label}
+          </Label>
         </div>
       ))}
     </RadioGroup>

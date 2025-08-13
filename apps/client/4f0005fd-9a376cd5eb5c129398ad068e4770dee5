@@ -1,0 +1,11 @@
+import { createFileRoute } from '@tanstack/react-router'
+
+export const Route = createFileRoute(
+  '/(console)/connections/integrations/types',
+)({
+  component: RouteComponent,
+})
+
+function RouteComponent() {
+  return <div>Hello "/(console)/connections/integrations/types"!</div>
+}

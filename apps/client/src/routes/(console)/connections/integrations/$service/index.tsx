@@ -1,17 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
-import CalendlyAuth from "./-calendly-auth";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { getUserDataQO } from "@/services/queries";
 import { authUserData } from "@/lib/auth-handler";
+import UniversalAuthComponent from "./-auth-component";
 
 export const Route = createFileRoute(
-  "/(console)/connections/integrations/calendly/"
+  "/(console)/connections/integrations/$service/",
 )({
-  loader: async ({ context: { auth } }) => {
+  loader: async ({ context: { auth }, params: { service } }) => {
     const userData = await authUserData(auth);
 
     return {
       userData,
+      service,
     };
   },
   component: RouteComponent,
@@ -19,7 +20,9 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
   const { userData } = Route.useLoaderData();
+  const { service } = Route.useParams();
 
+  console.log("SERVICIO => ", service);
   const { data: user } = useSuspenseQuery(
     getUserDataQO({
       type: "users",
@@ -27,21 +30,24 @@ function RouteComponent() {
         method: "getUserData",
         data: {
           withIntegrations: true,
-          service: "calendly",
+          service,
         },
       },
       userData,
-    })
+    }),
   );
 
   const { integrations } = user;
 
   // Garantizar que siempre es un array
-  const currentIntegration = integrations ?? [];
+  const [currentIntegration] = integrations ?? [];
+
+  console.log("currentIntegration => ", currentIntegration);
 
   return (
     <div>
-      <CalendlyAuth
+      <UniversalAuthComponent
+        serviceName={service || ""}
         currentIntegration={currentIntegration}
         userData={userData}
       />

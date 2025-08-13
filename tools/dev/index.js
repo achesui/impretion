@@ -42,6 +42,7 @@ const serviceMap = {
   "integrations-gateway": "@worker/integrations-gateway",
   generator: "@worker/generator",
   "producer-billing-orchestrator": "@worker/producer-billing-orchestrator",
+  "crypto-service": "@worker/crypto-service",
 };
 
 // Construir los filtros

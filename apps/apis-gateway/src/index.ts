@@ -39,6 +39,14 @@ export default class ApisGateway extends WorkerEntrypoint<Env> {
 
   private setupRoutes() {
     /**
+     * SHOPIFY
+     * Recibe los webhooks de shopify para cambios, actualzaciones y modificaciones en los productos.
+     */
+    this.app.post("/shopify/webhook/create-product", async(c) => {
+
+    })
+
+    /**
      * MERCADOPAGO
      */
     // Webhook de mercadopago.

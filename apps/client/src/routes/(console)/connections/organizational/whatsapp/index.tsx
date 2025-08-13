@@ -1,3 +1,4 @@
+/*
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -150,7 +151,6 @@ function RouteComponent() {
               key={index}
               className="bg-white border border-gray-200 rounded-lg p-4"
             >
-              {/* Header de la conexión */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-[#075e54] rounded-full flex items-center justify-center">
@@ -173,10 +173,8 @@ function RouteComponent() {
                 </div>
               </div>
 
-              {/* Divisor */}
               <div className="border-t border-gray-100 my-3"></div>
 
-              {/* Sección de asistentes */}
               <div className="space-y-2">
                 <h4 className="text-sm font-medium text-text-primary flex items-center gap-2">
                   <Bot className="w-4 h-4 text-text-primary" />
@@ -264,3 +262,4 @@ function RouteComponent() {
     </div>
   );
 }
+ */

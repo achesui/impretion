@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import whatsappLogo from "../../../../assets/logos/whatsapp-business.svg";
+import { Globe } from "lucide-react";
 
 export const Route = createFileRoute("/(console)/connections/organizational/")({
   component: RouteComponent,
@@ -8,6 +9,22 @@ export const Route = createFileRoute("/(console)/connections/organizational/")({
 function RouteComponent() {
   return (
     <div className="p-4">
+      <Link to="/connections/organizational/website">
+        <div className="border-border flex items-center w-2/4 gap-2 border p-2 bg-soft-surface rounded-md">
+          <Globe size={70} className="text-text-primary" />
+          <div>
+            <p className="text-text-primary font-semibold">
+              Conecta tus sitios web con la última tecnología en chatbots.
+            </p>
+            <p className="text-sm text-text-secondary">
+              Conecta o crea un número existente a nuestra plataforma, asignale
+              un asistente y asi de facil el asistente comenzara a atender tus
+              clientes.
+            </p>
+          </div>
+        </div>
+      </Link>
+      {/*
       <Link to="/connections/organizational/whatsapp">
         <div className="border-border flex items-center w-2/4 gap-2 border p-2 bg-soft-surface rounded-md">
           <img className="w-10 h-10" src={whatsappLogo}></img>
@@ -23,6 +40,7 @@ function RouteComponent() {
           </div>
         </div>
       </Link>
+       */}
     </div>
   );
 }

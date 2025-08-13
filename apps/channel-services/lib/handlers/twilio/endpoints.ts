@@ -1,4 +1,3 @@
-import { neon } from "@neondatabase/serverless";
 import { Context } from "hono";
 import {
   ConnectionSchema,
@@ -8,8 +7,8 @@ import {
 import { twilioClient } from "./client";
 import { twiml } from "twilio";
 import { createMessage } from "../../create-message";
+import { ServiceResponse } from "@base/shared-types";
 import { GetConnectionResponse } from "@core-service/types";
-import { ServiceResponse } from "../../../../global";
 
 export async function whatsappIncomingMessage(c: Context<{ Bindings: Env }>) {
   try {
@@ -66,6 +65,9 @@ export async function whatsappIncomingMessage(c: Context<{ Bindings: Env }>) {
 
       // Mensaje enviado por el usuario.
       message,
+
+      // Marca de tiempo de envio de este mensaje. Requerido para algunas conexiones.
+      timestamp: new Date(),
 
       isInternal: false,
 
@@ -136,8 +138,8 @@ export async function whatsappIncomingMessage(c: Context<{ Bindings: Env }>) {
 export async function verification(
   c: Context<{ Bindings: Env }>,
   twilioTemplateMessages: (
-    props: TemplateTypeProps
-  ) => Promise<ServiceResponse<string, any>>
+    props: TemplateTypeProps,
+  ) => Promise<ServiceResponse<string, any>>,
 ) {
   const body = await c.req.json();
   const { to } = body;
@@ -161,7 +163,7 @@ export async function verification(
         success: false,
         error: response.error || "Failed to send verification",
       },
-      500
+      500,
     );
   }
 
@@ -173,7 +175,7 @@ export async function verificationValidation(c: Context<{ Bindings: Env }>) {
   const body = await c.req.json();
   const { to, code } = body;
   const verificationCode = await c.env.SYSTEM_CACHE.get(
-    `direct-connection-verification-code-${to}`
+    `direct-connection-verification-code-${to}`,
   );
 
   if (verificationCode === code) {
@@ -188,6 +190,6 @@ export async function verificationValidation(c: Context<{ Bindings: Env }>) {
       success: false,
       error: "El código de verificación es incorrecto o ya venció.",
     },
-    500
+    500,
   );
 }

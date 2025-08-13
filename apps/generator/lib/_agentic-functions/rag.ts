@@ -1,6 +1,5 @@
 import { GetCollectionsResponse } from "@core-service/types";
-import { FunctionCallingProps, RagArgs } from "../../../src/types";
-import { newGeneration } from "../../../lib/generation-handler/new-generation";
+import { FunctionCallingProps, RagArgs } from "../../src/types";
 
 export const rag = async <TAgentContext>({
   stateHelpers,
@@ -82,7 +81,7 @@ export const rag = async <TAgentContext>({
   return data;
 };
 
-export function RagTool(currentCollections: GetCollectionsResponse[]) {
+export function ragTool(currentCollections: GetCollectionsResponse[]) {
   const collectionsDescription = currentCollections
     .map((collection) => `- ID: "${collection.id}" | ${collection.description}`)
     .join("\n\n");

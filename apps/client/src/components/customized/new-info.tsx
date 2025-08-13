@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { InfoIcon } from "lucide-react";
 import { ReactNode, CSSProperties } from "react";
 
@@ -8,21 +9,29 @@ interface NewInfoProps {
     text?: CSSProperties;
     iconSize?: number;
   };
+  className: string;
 }
 
-export default function NewInfo({ children, style = {} }: NewInfoProps) {
+export default function NewInfo({
+  children,
+  style = {},
+  className,
+}: NewInfoProps) {
   const { container = {}, text = {}, iconSize = 18 } = style;
 
   return (
     <div
-      className="p-1 flex items-center bg-slate-50 border border-slate-200 rounded-md"
+      className={cn(
+        "p-1 flex items-center bg-slate-50 border border-slate-200 rounded-md",
+        className,
+      )}
       style={container}
     >
       <div className="flex-shrink-0">
-        <InfoIcon size={iconSize} className="text-slate-400" />
+        <InfoIcon size={iconSize} className="text-text-primary" />
       </div>
-      <div className="ml-3" style={text}>
-        <p className="text-sm text-slate-500">{children}</p>
+      <div className="ml-1" style={text}>
+        <p className={"text-sm text-text-primary"}>{children}</p>
       </div>
     </div>
   );

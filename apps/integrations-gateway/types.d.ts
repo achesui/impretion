@@ -7,6 +7,20 @@ export type CalendlyTokenData = {
   refresh_token?: string;
 };
 
+export type ShopifyTokenData = {
+  clientId: string;
+  code: string;
+  grantType: string;
+  hmac: string;
+  host: string;
+  redirectUri: string;
+  service: string;
+  shop: string;
+  shopUrl: string;
+  state: string;
+  timestamp: string;
+};
+
 /*
 export type GoogleTokenData = {
   code: string;
@@ -20,6 +34,7 @@ export type GoogleTokenData = {
 // Union type for all service data
 export type ServiceTokenData = {
   calendly: CalendlyTokenData;
+  shopify: ShopifyTokenData;
   impretionAuth0ManagementAPI: {};
   //google: GoogleTokenData;
   // Add more services here
@@ -27,7 +42,7 @@ export type ServiceTokenData = {
 
 // Generic params type with conditional data
 export type GetTokensParams<
-  T extends keyof ServiceTokenData = keyof ServiceTokenData
+  T extends keyof ServiceTokenData = keyof ServiceTokenData,
 > = {
   service: T;
   data: ServiceTokenData[T];
@@ -39,7 +54,7 @@ export type GetTokensParams<
 export type RevokeTokensParams = {
   service: keyof ServiceTokenData;
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
 };
 
 // OAuth Token Response types
@@ -53,6 +68,8 @@ export type CalendlyOAuthTokenResponse = {
   owner: string;
   organization: string;
 };
+
+export type ShopifyOAuthTokenResponse = {};
 
 // Auth0 Token Response Types
 export type Auth0ManagementApiResponse = {
@@ -83,13 +100,13 @@ export type GetServiceType = "generate" | "regenerate";
 export type TokenHandler<T extends keyof ServiceTokenData> = (
   env: Env,
   data: ServiceTokenData[T],
-  type: "generate" | "regenerate"
+  type: "generate" | "regenerate",
 ) => Promise<any>;
 
 export type RevokeTokenHandler = (
   env: Env,
   accessToken: string,
-  refreshToken: string
+  refreshToken: string,
 ) => Promise<void>;
 
 export type GenerateTokensHandler = {

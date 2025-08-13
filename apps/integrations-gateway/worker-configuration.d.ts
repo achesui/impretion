@@ -4,11 +4,17 @@
 declare namespace Cloudflare {
   interface Env {
     ACCESS_TOKENS: KVNamespace;
+
     CALENDLY_CLIENT_ID: string;
     CALENDLY_CLIENT_SECRET: string;
     CALENDLY_WEBHOOK_SIGNIN_KEY: string;
+
     AUTH0_MANAGEMENT_API_CLIENT: string;
     AUTH0_MANAGEMENT_API_SECRET: string;
+
+    SHOPIFY_CLIENT_ID: string;
+    SHOPIFY_CLIENT_SECRET: string;
+
     CRYPTO_SERVICE: Service<import("../crypto-service/src/index.ts").default>;
   }
 }

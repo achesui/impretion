@@ -1,5 +1,5 @@
 import { ActionProcessing, DatabaseQueryArgs } from "../../../src/types";
-import { newGeneration } from "../../../lib/generation-handler/new-generation";
+import { newGeneration } from "../generation-handler/new-generation";
 
 export const databaseQuery = async <TAgentContext>({
   helpers,
@@ -26,13 +26,13 @@ export const databaseQuery = async <TAgentContext>({
     helpers,
     env,
     body: {
-      connectedWith: "",
+      subscriptions: [],
       connectionType: "agentic",
       message: naturalLanguageQuery,
-      organizationId,
+      organizationId: "",
       directConnections: [],
       subscribedToAssistant: "",
-      from: null,
+      from,
       isInternal: true,
       source: "databaseQuery",
       userId,

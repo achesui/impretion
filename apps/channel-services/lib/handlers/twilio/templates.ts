@@ -10,12 +10,13 @@ import { Twilio } from "twilio";
 import { SubaccountTokens } from "./twilio-types";
 
 export const appointmentHandlers = {
+  // Template de meta requerido
   newAppointmentNotification: async (
     env: Env,
     data: { name: string; date: string; time: string },
     from: string,
     to: string,
-    connectionType: string
+    connectionType: string,
   ) => {
     const { time, date } = data;
     const message = cleanIndentation(`
@@ -26,9 +27,7 @@ export const appointmentHandlers = {
 
 👤 INFORMACIÓN DEL USUARIO:
 - Nombre: ${data.name}
-- Teléfono: ${formatPhone(phone)}
-
-🔔 Me pondré en contacto con el usuario 24 horas antes de la cita.`);
+- Teléfono: ${formatPhone(phone)}`);
 
     await twilioClient(env).messages.create({
       from: "whatsapp:+14155238886",
@@ -38,12 +37,13 @@ export const appointmentHandlers = {
     return message;
   },
 
+  // Template de meta requerido
   appointmentReminder: async (
     env: Env,
     data: { name: string; date: string; time: string },
     from: string,
     to: string,
-    connectionType: string
+    connectionType: string,
   ) => {
     const message = `
 ¡Hola ${data.name}! 😊
@@ -51,6 +51,7 @@ export const appointmentHandlers = {
 Solo para recordarte que mañana tienes tu cita odontológica:
 
 🗓️ ${formatDate(data.date)} a las ${formatTime(data.time)}
+
 
 ¡Nos vemos pronto! ✨
 `.trim();
@@ -73,7 +74,7 @@ Solo para recordarte que mañana tienes tu cita odontológica:
       status: string;
       code: string;
     },
-    phone: string
+    phone: string,
   ) => {
     const statusDots: Record<string, string> = {
       pending: "🟡 Tu cita está pendiente.",
@@ -106,7 +107,7 @@ ${statusDots[data.status] || "⚪"}`);
       time: string;
       code: string;
     },
-    phone: string
+    phone: string,
   ) => {
     const message = cleanIndentation(`
 📅 *TU CITA HA SIDO AGENDADA*
@@ -137,11 +138,11 @@ export const verificationHandlers = {
     data: string,
     subaccountTokens: SubaccountTokens,
     from: string,
-    to: string
+    to: string,
   ) => {
     const code = Array.from(
       { length: 6 },
-      () => Math.floor(Math.random() * 9) + 1
+      () => Math.floor(Math.random() * 9) + 1,
     ).join("");
 
     const twilio = await twilioClient(subaccountTokens);
@@ -151,7 +152,7 @@ export const verificationHandlers = {
     console.log("code => ", code);
     const twilioInstance = await twilio.messages.create({
       from: "whatsapp:+573233311171", // "whatsapp:+14155238886" - "whatsapp:+573233311171" <- prod
-      contentSid: "HX68e26837d0e6e3343e64a7c0b1db425f", // HX68e26837d0e6e3343e64a7c0b1db425f - HX68e26837d0e6e3343e64a7c0b1db425f <- prod
+      contentSid: "HX8b747b69d3fc62e95446ea8457234197", // HX68e26837d0e6e3343e64a7c0b1db425f - HX8b747b69d3fc62e95446ea8457234197 <- prod
       contentVariables: JSON.stringify({ 1: code }),
       to: `whatsapp:${to}`,
     });
@@ -163,7 +164,7 @@ export const verificationHandlers = {
       code,
       {
         expirationTtl: 900,
-      }
+      },
     );
 
     return true;
@@ -176,7 +177,7 @@ export const defaultHandlers = {
     data: string,
     subaccountTokens: SubaccountTokens,
     from: string,
-    to: string
+    to: string,
   ): Promise<boolean> => {
     try {
       const { accountSid, authToken } = subaccountTokens;
@@ -185,7 +186,7 @@ export const defaultHandlers = {
       // Validar que tenemos los datos necesarios
       if (!accountSid || !authToken) {
         throw new Error(
-          "accountSid y authToken son requeridos para enviar mensajes"
+          "accountSid y authToken son requeridos para enviar mensajes",
         );
       }
 
@@ -204,14 +205,14 @@ export const defaultHandlers = {
         !decryptedAuthTokenResponse.data
       ) {
         throw new Error(
-          "Error desencriptando el token desde los metadatos de la subacountgit de Twilio al enviar un mensaje común."
+          "Error desencriptando el token desde los metadatos de la subacountgit de Twilio al enviar un mensaje común.",
         );
       }
 
       console.log(
         "acc tokens => ",
         accountSid,
-        decryptedAuthTokenResponse.data
+        decryptedAuthTokenResponse.data,
       );
 
       const twilio = twilioClient({

@@ -1,8 +1,8 @@
 import {
-  ActionProcessing,
   EditActionConfigurationArgs,
-} from "../../../src/types";
-import { newGeneration } from "../../../lib/generation-handler/new-generation";
+  FunctionCallingProps,
+} from "../../src/types";
+import { newGeneration } from "../generation-handler/new-generation";
 
 export const editActionConfiguration = async <TAgentContext>({
   helpers,
@@ -14,7 +14,7 @@ export const editActionConfiguration = async <TAgentContext>({
   directConnections,
   userId,
   env,
-}: ActionProcessing<TAgentContext, EditActionConfigurationArgs>): Promise<
+}: FunctionCallingProps<TAgentContext, EditActionConfigurationArgs>): Promise<
   string | null
 > => {
   const { naturalLanguageQuery } = functionArguments;

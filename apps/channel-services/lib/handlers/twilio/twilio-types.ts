@@ -85,6 +85,8 @@ export type TwilioOrganizationalConnectionData = {
   assistantId: string;
   wabaId: string;
   phone: string;
+  businessName: string;
+  templateId: string;
 };
 
 export type OrganizationalTypeConnectionFlow = {
@@ -105,38 +107,38 @@ export type TemplateHandlers = {
     data: string,
     subaccountTokens: SubaccountTokens,
     from: string,
-    to: string
+    to: string,
   ) => Promise<boolean>;
   newAppointmentNotification: (
     env: Env,
     data: NewAppointmentNotificationData,
     subaccountTokens: SubaccountTokens,
     from: string,
-    to: string
+    to: string,
   ) => Promise<boolean>;
   appointmentReminder: (
     env: Env,
     data: AppointmentReminderData,
     from: string,
-    to: string
+    to: string,
   ) => Promise<boolean>;
   appointmentDetails: (
     env: Env,
     data: ApppointmentDetailsData,
-    phone: string
+    phone: string,
   ) => Promise<boolean>;
   commonMessage: (
     env: Env,
     data: string,
     subaccountTokens: SubaccountTokens,
     from: string,
-    to: string
+    to: string,
   ) => Promise<boolean>;
   createdAppointment: (
     env: Env,
     data: CreatedAppointmentData,
     from: string,
-    to: string
+    to: string,
   ) => Promise<boolean>;
 };
 

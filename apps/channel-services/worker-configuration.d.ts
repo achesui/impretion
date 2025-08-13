@@ -9,6 +9,7 @@ declare namespace Cloudflare {
     CORE_SERVICE: Service<import("../core-service/src/index").default>;
     CRYPTO_SERVICE: Service<import("../crypto-service/src/index").default>;
     SYSTEM_CACHE: KVNamespace;
+    ENV: string;
   }
 }
 interface Env extends Cloudflare.Env {}

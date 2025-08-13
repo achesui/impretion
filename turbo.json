@@ -22,7 +22,14 @@
     },
     "dev": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "inputs": [
+        "src/**/*",
+        "**/*.{js,jsx,ts,tsx,vue,svelte}",
+        "package.json",
+        "vite.config.*",
+        ".env*"
+      ]
     }
   }
 }

@@ -150,6 +150,7 @@ export const appointment = async <TAgentContext>({
     const { cancelSchedule, schedule, setState, state } = stateHelpers;
     const { organizationId } = userData;
 
+    /*
     if (actionType === "create") {
       const validatedFields = await fieldValidation(finalResults);
 
@@ -408,6 +409,7 @@ export const appointment = async <TAgentContext>({
         },
       };
     }
+     */
     /*
 
 

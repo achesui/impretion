@@ -3,6 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { getUserDataQO } from "@/services/queries";
 import { authUserData } from "@/lib/auth-handler";
 import calendlyLogo from "../../../../assets/logos/calendly.svg";
+import shopifyLogo from "../../../../assets/logos/shopify.svg";
 
 export const Route = createFileRoute("/(console)/connections/integrations/")({
   loader: async ({ context: { auth } }) => {
@@ -26,13 +27,13 @@ function RouteComponent() {
         },
       },
       userData,
-    })
+    }),
   );
 
   const { integrations: userIntegrations } = user;
 
   return (
-    <div className="p-6">
+    <div className="p-4">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-text-primary">Integraciones</h1>
         <p className="text-text-primary">
@@ -45,20 +46,22 @@ function RouteComponent() {
         {integrations.map((integration) => {
           // Buscar si el usuario ya tiene esta integración conectada
           const isConnected = userIntegrations?.find(
-            (userIntegration) => userIntegration.service === integration.service
+            (userIntegration) =>
+              userIntegration.service === integration.service,
           );
 
           return (
             <Link
               key={integration.service}
-              to={`/connections/integrations/${integration.route}` as any}
+              to={`/connections/integrations/$service`}
+              params={{ service: integration.service }}
               className="hover:shadow-sm rounded-xl shadow-soft-surface"
             >
-              <div className="border border-gray-200 rounded-xl p-6 shadow-sm bg-white h-32 flex items-center justify-between hover:border-gray-300 transition-colors">
+              <div className="border border-gray-200 rounded-xl p-3 shadow-sm bg-white flex items-center justify-between hover:border-gray-300 transition-colors">
                 <div className="flex items-center space-x-4 flex-1">
                   <div className="flex-shrink-0">
                     <img
-                      className="w-12 h-12 rounded-lg shadow-sm"
+                      className="w-8 h-8 rounded-lg shadow-sm"
                       src={integration.logo}
                       alt={`${integration.name} logo`}
                     />
@@ -143,6 +146,12 @@ const integrations = [
     route: "calendly",
     name: "Calendly",
     logo: calendlyLogo,
+  },
+  {
+    service: "shopify",
+    route: "shopify",
+    name: "Shopify",
+    logo: shopifyLogo,
   },
   // Ejemplo de más integraciones que puedes añadir:
   // {

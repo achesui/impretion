@@ -6,27 +6,26 @@ import {
   ResponseFormat,
 } from "../openrouter/openrouter.types";
 import functionCalling from "../../services";
-import { ServiceResponse } from "../../../global";
 import {
   ActionsConfiguration,
   AIGatewayMetadata,
   AssistantActionsData,
   ChatCompletionProps,
 } from "../../src/types";
-import { editActionConfigurationTool } from "../../services/functions/_agentic/edit-action-configuration";
-import { databaseQueryTool } from "../../services/functions/_agentic/database-query";
+
 import {
   GetAssistantsResponse,
   GetCacheList,
   GetCollectionsResponse,
 } from "@core-service/types";
-import { RagTool } from "../../services/functions/_agentic/rag";
 import { agenticHandler } from "../../services/agentic-handler";
 import { responseBuilder } from "./response-builder";
-import { getSchedules } from "../../services/functions/appointment/utils/scheduled-appointments-handler";
-import { addOrSubstractFromDate } from "../../services/utils";
 import { directConnectionPrompt } from "../direct-connection-prompt";
 import { organizationalPrompt } from "../organizational-connection-prompt";
+import { ServiceResponse } from "@base/shared-types";
+import { ragTool } from "../_agentic-functions/rag";
+import { databaseQueryTool } from "../_agentic-functions/database-query";
+import { editActionConfigurationTool } from "../_agentic-functions/edit-action-configuration";
 
 // Función para obtener tools y configuración directa
 function getDirectConnectionData(): {
@@ -67,6 +66,7 @@ function getDirectConnectionData(): {
 async function mapOrganizationalData(
   getAssistant: GetAssistantsResponse,
   organizationId: string,
+  source: string,
   env: Env,
 ): Promise<{
   actionsSchema: Tool[];
@@ -165,7 +165,7 @@ async function mapOrganizationalData(
       assistantActionsData.push({
         actionId: crypto.randomUUID(),
         actionType: "rag",
-        actionSchema: RagTool(currentCollections),
+        actionSchema: ragTool(currentCollections),
         configuration: {},
       });
     }
@@ -205,9 +205,10 @@ moonshotai/kimi-k2:free
 qwen/qwen3-235b-a22b-2507:free
  */
 const defaultModels = [
-  "openai/gpt-4.1-nano",
-  "qwen/qwen3-coder:free",
   "z-ai/glm-4.5-air:free",
+  "deepseek/deepseek-chat-v3-0324:free",
+  "openai/gpt-4.1-nano",
+  //"qwen/qwen3-coder:free",
 ];
 export async function newGeneration<TAgentContext>({
   stateHelpers,
@@ -222,16 +223,18 @@ export async function newGeneration<TAgentContext>({
     userData,
     subscriptions,
     message,
+    timestamp,
     from,
     to,
   } = body;
-
   let actionsSchema: Tool[] = [];
   let conversationContext: Message[] = [];
   let actionConfiguration: ActionsConfiguration = {};
   let systemPrompt: string = "";
   let responseFormat: ResponseFormat = undefined;
-  const { state } = stateHelpers;
+  const userMessageTimestamp = timestamp;
+
+  const { state, sql } = stateHelpers;
 
   /**
    * Si el tipo de conexión es "organizacional" se obtiene el id del asistente.
@@ -289,6 +292,7 @@ export async function newGeneration<TAgentContext>({
       const organizationalData = await mapOrganizationalData(
         getAssistant,
         userData.organizationId,
+        source,
         env,
       );
 
@@ -321,9 +325,13 @@ export async function newGeneration<TAgentContext>({
         role: "system",
         content: systemPrompt,
       },
-      ...(state.conversationContext as Message[]),
+      ...(Array.isArray(state.lastConversationMessages)
+        ? (state.lastConversationMessages as Message[])
+        : []),
       { role: "user", content: message },
     ];
+
+    console.log("conversationContext => ", conversationContext);
   } catch (error) {
     console.error("Error al obtener los datos de configuración:", error);
     return {
@@ -332,7 +340,24 @@ export async function newGeneration<TAgentContext>({
     };
   }
 
-  console.log(conversationContext);
+  /**
+   * Implementación de manejo de templates inteligentes para Whatsapp.
+   * Los asistentes deben hacer interactuar al usuario para que la interacción sea correcta y no solo una IA automatizada.
+   * organizational: Debe mostrarle al usuario las acciones que tiene si el usuario las pide, ser dinamico en sus respuestas. Lo más interactivo posible.
+   * direct: Al terminar la ejecución de alguna acción sugerirle que puede ayudarle con algo más (calcular usaurio registrados por ej.).
+   * responseFormat: Se encargara de, según la inferencia retornar un template si es necesario.
+   */
+  if (source === "whatsapp") {
+  }
+
+  console.log(
+    "props a openrouter => ",
+    conversationContext,
+    models,
+    responseFormat,
+    actionsSchema,
+    AIGatewayMetadata,
+  );
 
   const completion: OpenRouterResponse = await openRouter({
     env,
@@ -355,6 +380,7 @@ export async function newGeneration<TAgentContext>({
   }
 
   const choice = completion.choices[0];
+  const assistantMessageTimestamp = new Date();
 
   if ("message" in choice) {
     const assistantMessage = choice.message;
@@ -389,8 +415,6 @@ export async function newGeneration<TAgentContext>({
             to,
             env,
           });
-
-          console.log("RESPUESTA DE FUNCION => ", functionResponse);
 
           if (functionResponse.withTemplate) {
             type = functionResponse.data.type;
@@ -449,6 +473,8 @@ export async function newGeneration<TAgentContext>({
       }
 
       return responseBuilder<TAgentContext>({
+        sql,
+        userData,
         stateHelpers,
         channelPayload: {
           responseMetadata,
@@ -461,6 +487,10 @@ export async function newGeneration<TAgentContext>({
           userMessage: message,
           assistantMessage: data,
         },
+        timestamps: {
+          userMessageTimestamp,
+          assistantMessageTimestamp,
+        },
         model: usedModel,
         source,
         from,
@@ -472,6 +502,8 @@ export async function newGeneration<TAgentContext>({
     // Respuesta directa sin tool calls
     if (assistantMessage.content) {
       return responseBuilder<TAgentContext>({
+        sql,
+        userData,
         stateHelpers,
         channelPayload: {
           responseMetadata: {},
@@ -483,6 +515,10 @@ export async function newGeneration<TAgentContext>({
         messages: {
           userMessage: message,
           assistantMessage: assistantMessage.content,
+        },
+        timestamps: {
+          userMessageTimestamp,
+          assistantMessageTimestamp,
         },
         model: usedModel,
         source,

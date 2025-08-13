@@ -1,3 +1,4 @@
+/*
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   CheckCircle,
@@ -21,9 +22,10 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { authUserData } from "@/lib/auth-handler";
 import { queryClient } from "@/router";
 import FacebookLoginButton from "../-components/facebook-login-button";
+import { NewRadioGroup } from "@/components/customized/new-radio-group";
 
 export const Route = createFileRoute(
-  "/(console)/connections/organizational/whatsapp/create/"
+  "/(console)/connections/organizational/whatsapp/create/",
 )({
   loader: async ({ context: { queryClient, auth } }) => {
     const userData = await authUserData(auth);
@@ -36,7 +38,7 @@ export const Route = createFileRoute(
           data: {},
         },
         userData,
-      })
+      }),
     );
 
     return {
@@ -47,27 +49,52 @@ export const Route = createFileRoute(
 });
 
 const FormSchema = z.object({
-  wabaId: z.string().min(1, {
-    message: "Id del perfil de whatsapp no encontrado.",
-  }),
-  senderId: z.string().min(1, {
-    message: "Número no encontrado.",
-  }),
-  assistantId: z.string().min(1, {
-    message: "Asistente no encontrado.",
-  }),
+  senderId: z.string().min(1, "Número de WhatsApp es requerido"),
+  assistantId: z.string().min(1, "Asistente es requerido"),
+  wabaId: z.string().min(1, "WABA ID es requerido"),
+  businessName: z.string().min(1, "Nombre del negocio es requerido"),
+  templateId: z.string().min(1, "Plantilla de respuesta es requerida"),
 });
 
-type FormValues = {
-  wabaId: string;
-  senderId: string;
-  assistantId: string;
-};
+type FormValues = z.infer<typeof FormSchema>;
+
+const templates = [
+  {
+    value: "HXb699065d365e6fdca7452b7ea4184a72",
+    label: "Plantilla Genérica",
+    content: (
+      businessName: string,
+    ) => `Hola Pablo, bienvenid@ a ${businessName || "[Nombre del negocio]"}.
+
+Gracias por contactarnos. En ${businessName || "[Nombre del negocio]"} estamos listos para ayudarte con lo que necesites. ¿Te gustaría conversar ahora o prefieres conocer más sobre nuestros servicios?`,
+    buttons: ["Conversar", "Explorar opciones"],
+  },
+  {
+    value: "HXe2e7688ec4de6a9d272785a8721dacd7",
+    label: "Plantilla de Equipo",
+    content: (
+      businessName: string,
+    ) => `Hola Pablo, te saluda el equipo de ${businessName || "[Nombre del negocio]"}.
+
+Queremos darte la bienvenida. ¿Deseas conversar o te explico lo que hacemos y cómo podemos ayudarte?`,
+    buttons: ["Conversar", "Explorar opciones"],
+  },
+  {
+    value: "HX31ecf1a89741b3bdeadf872bb1df4501",
+    label: "Plantilla de Agradecimiento",
+    content: (
+      businessName: string,
+    ) => `Hola Pablo, gracias por elegir ${businessName || "[Nombre del negocio]"}.
+
+Estamos disponibles para ayudarte en lo que necesites. ¿Cómo podemos ayudarte?`,
+    buttons: ["Conversar", "Explorar opciones"],
+  },
+];
 
 function RouteComponent() {
   const { userData } = Route.useLoaderData();
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 3;
+  const [currentStep, setCurrentStep] = useState(4);
+  const totalSteps = 4;
 
   const {
     register,
@@ -79,9 +106,11 @@ function RouteComponent() {
   } = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      senderId: "",
-      assistantId: "",
-      wabaId: "",
+      senderId: "senderId",
+      assistantId: "bec62c3b-4140-48f9-b5c4-7985ae6285cf",
+      wabaId: "waba-123",
+      businessName: "choclos",
+      templateId: "template-123",
     },
   });
 
@@ -95,13 +124,12 @@ function RouteComponent() {
         data: {},
       },
       userData,
-    })
+    }),
   );
 
   // Hook para insertar la conexión en la base de datos
   const createConnectionMutation = useUpsertConnectionMutation({
     onSuccess: async () => {
-      //setCurrentStep("success");
       window.location.href = "/connections/organizational/whatsapp";
       // Invalidación de cache
       await queryClient.invalidateQueries({
@@ -118,6 +146,7 @@ function RouteComponent() {
       // Envio de datos al backend de twilio.
       console.log("Datos a twilio", data);
       console.log("userData => ", userData);
+
       createConnectionMutation.mutate({
         type: "connections",
         query: {
@@ -132,6 +161,8 @@ function RouteComponent() {
               wabaId: data.wabaId,
               assistantId: data.assistantId,
               phone: `+${data.senderId}`,
+              businessName: data.businessName,
+              templateId: data.templateId,
             },
           },
         },
@@ -157,6 +188,12 @@ function RouteComponent() {
             ? "error"
             : "pending";
       case 3:
+        return watchedValues.businessName && watchedValues.templateId
+          ? "completed"
+          : errors.businessName || errors.templateId
+            ? "error"
+            : "pending";
+      case 4:
         return watchedValues.wabaId
           ? "completed"
           : errors.wabaId
@@ -174,6 +211,8 @@ function RouteComponent() {
       case 2:
         return !!watchedValues.assistantId;
       case 3:
+        return !!watchedValues.businessName && !!watchedValues.templateId;
+      case 4:
         return !!watchedValues.wabaId;
       default:
         return false;
@@ -200,6 +239,8 @@ function RouteComponent() {
     return (
       watchedValues.senderId &&
       watchedValues.assistantId &&
+      watchedValues.businessName &&
+      watchedValues.templateId &&
       watchedValues.wabaId
     );
   };
@@ -208,13 +249,15 @@ function RouteComponent() {
     let completedSteps = 0;
     if (watchedValues.senderId) completedSteps++;
     if (watchedValues.assistantId) completedSteps++;
+    if (watchedValues.businessName && watchedValues.templateId)
+      completedSteps++;
     if (watchedValues.wabaId) completedSteps++;
     return (completedSteps / totalSteps) * 100;
   };
 
   const getAssistantName = (assistantId: string) => {
     const assistant = currentAssistants.find(
-      (assistant) => assistant.id === assistantId
+      (assistant) => assistant.id === assistantId,
     );
     return assistant ? assistant.name : "";
   };
@@ -238,14 +281,37 @@ function RouteComponent() {
       });
     }
 
+    if (
+      currentStep > 3 &&
+      watchedValues.businessName &&
+      watchedValues.templateId
+    ) {
+      const selectedTemplate = templates.find(
+        (t) => t.value === watchedValues.templateId,
+      );
+      completedInfo.push({
+        label: "Nombre del negocio:",
+        value: watchedValues.businessName,
+        step: 3,
+      });
+      completedInfo.push({
+        label: "Plantilla seleccionada:",
+        value: selectedTemplate?.label || "No seleccionada",
+        step: 3,
+      });
+    }
+
     if (completedInfo.length === 0) return null;
 
     return (
-      <div className="mb-6 p-3 bg-soft-surface border border-border rounded-lg">
-        <div className="space-y-1">
-          {completedInfo.map((info) => (
-            <div key={info.step} className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-text-primary flex-shrink-0" />
+      <div className="mb-6 p-4 bg-soft-surface border border-border rounded-lg">
+        <div className="space-y-2">
+          {completedInfo.map((info, index) => (
+            <div
+              key={`${info.step}-${index}`}
+              className="flex items-center gap-2"
+            >
+              <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
               <span className="text-sm text-text-primary">
                 <strong>{info.label}</strong> {info.value}
               </span>
@@ -265,18 +331,20 @@ function RouteComponent() {
             description="Proporciona el mismo número que colocaste para registrar."
             error={errors.senderId?.message}
           >
-            <Input
-              type="text"
-              placeholder="Número registrado, Ejemplo: 3121345678"
-              className={`w-full transition-colors duration-200 ${
-                errors.senderId
-                  ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                  : watchedValues.senderId
-                    ? "border-green-300 focus:border-green-500 focus:ring-green-500"
-                    : "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-              }`}
-              {...register("senderId")}
-            />
+            <div className="flex justify-center">
+              <Input
+                type="text"
+                placeholder="Número de Whatsapp que vas a conectar, Ejemplo: 3121345678"
+                className={`w-full max-w-md transition-colors duration-200 ${
+                  errors.senderId
+                    ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                    : watchedValues.senderId
+                      ? "border-green-300 focus:border-green-500 focus:ring-green-500"
+                      : "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                }`}
+                {...register("senderId")}
+              />
+            </div>
           </StepContent>
         );
       case 2:
@@ -318,6 +386,133 @@ function RouteComponent() {
       case 3:
         return (
           <StepContent
+            title="Plantilla de respuesta de inicio"
+            description="Configura el primer mensaje que recibirán tus clientes para cumplir con las políticas de Meta."
+            error={errors.businessName?.message || errors.templateId?.message}
+          >
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm text-start font-medium text-text-primary mb-1">
+                      Nombre de tu negocio
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Ej: Mi Empresa"
+                      className={`w-full transition-colors duration-200 ${
+                        errors.businessName
+                          ? "border-red-300 focus:border-red-500 focus:ring-red-500"
+                          : watchedValues.businessName
+                            ? "border-green-300 focus:border-green-500 focus:ring-green-500"
+                            : "border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                      }`}
+                      {...register("businessName")}
+                    />
+                    {errors.businessName && (
+                      <p className="text-red-500 text-sm mt-2">
+                        {errors.businessName.message}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <h3 className="text-sm text-start font-medium text-text-primary">
+                      Selecciona una plantilla
+                    </h3>
+
+                    <Controller
+                      name="templateId"
+                      control={control}
+                      render={({ field }) => (
+                        <NewRadioGroup
+                          defaultValue={field.value}
+                          items={templates.map((template) => ({
+                            value: template.value,
+                            label: template.label,
+                          }))}
+                          onChange={(value) => field.onChange(value)}
+                        />
+                      )}
+                    />
+
+                    {errors.templateId && (
+                      <p className="text-red-500 text-sm mt-2">
+                        {errors.templateId.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm text-start font-medium text-text-primary">
+                    Vista previa
+                  </h3>
+
+                  {watchedValues.templateId ? (
+                    <div className="bg-white border border-gray-200 rounded-md p-3">
+                      {(() => {
+                        const selectedTemplate = templates.find(
+                          (t) => t.value === watchedValues.templateId,
+                        );
+                        if (!selectedTemplate) return null;
+
+                        return (
+                          <>
+                            <div className="text-start text-text-primary whitespace-pre-line mb-2 leading-relaxed">
+                              {selectedTemplate.content(
+                                watchedValues.businessName || "Tu Negocio",
+                              )}
+                            </div>
+                            <div className="flex gap-2 w-full">
+                              {selectedTemplate.buttons.map((button, index) => (
+                                <button
+                                  key={index}
+                                  type="button"
+                                  className="bg-green-50 border border-green-200 text-green-700 text-sm px-4 py-2 rounded-md font-medium cursor-default flex-1"
+                                  disabled
+                                >
+                                  {button}
+                                </button>
+                              ))}
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center">
+                      <div className="text-gray-500">
+                        <div className="w-12 h-12 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
+                          <svg
+                            className="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                            />
+                          </svg>
+                        </div>
+                        <p className="font-medium">Selecciona una plantilla</p>
+                        <p className="text-sm mt-1">
+                          La vista previa aparecerá aquí
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </StepContent>
+        );
+      case 4:
+        return (
+          <StepContent
             title="Conecta tu portafolio de negocios con tu cuenta de Facebook"
             description="Conecta tu portafolio de Facebook a Impretion para administrar a tus clientes con tu asistente de Inteligencia Artificial."
             error={errors.wabaId?.message}
@@ -351,11 +546,10 @@ function RouteComponent() {
             Conecta tu WhatsApp Business a nuestra plataforma
           </h1>
           <p className="text-text-secondary text-sm">
-            Configura tu asistente de IA en 3 sencillos pasos
+            Configura tu asistente de IA en 4 sencillos pasos
           </p>
         </div>
 
-        {/* Progress Bar */}
         <div className="px-6 py-4 bg-gray-50 border-b">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium text-gray-700">
@@ -372,9 +566,8 @@ function RouteComponent() {
             ></div>
           </div>
 
-          {/* Step Indicators */}
           <div className="flex justify-between mt-4">
-            {[1, 2, 3].map((step) => (
+            {[1, 2, 3, 4].map((step) => (
               <div key={step} className="flex flex-col items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-300 ${
@@ -396,7 +589,9 @@ function RouteComponent() {
                     ? "WhatsApp"
                     : step === 2
                       ? "Asistente"
-                      : "Facebook"}
+                      : step === 3
+                        ? "Plantilla"
+                        : "Facebook"}
                 </span>
               </div>
             ))}
@@ -404,13 +599,11 @@ function RouteComponent() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          {/* Step Content */}
           <div className="p-6 flex flex-col justify-center">
             {renderCompletedSteps()}
             {renderStepContent()}
           </div>
 
-          {/* Navigation */}
           <div className="px-6 py-4 bg-gray-50 border-t flex justify-between items-center">
             <Button
               type="button"
@@ -435,7 +628,7 @@ function RouteComponent() {
             ) : (
               <Button
                 type="submit"
-                disabled={isSubmitting || !allStepsComplete()}
+                //disabled={isSubmitting || !allStepsComplete()}
                 className="cursor-pointer bg-[#075e54] hover:bg-[#075e54] text-white font-semibold px-6"
               >
                 {isSubmitting ? (
@@ -488,7 +681,8 @@ function StepContent({
         </div>
       )}
 
-      <div className="max-w-md mx-auto">{children}</div>
+      <div className="">{children}</div>
     </div>
   );
 }
+ */

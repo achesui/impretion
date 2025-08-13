@@ -1,6 +1,5 @@
 import { WorkerEntrypoint } from 'cloudflare:workers';
 import { MainDatabaseQueryProps } from '../postgres-database/queries';
-import { ServiceResponse, ErrorDetails } from '../../global';
 import { Hono } from 'hono';
 import { drizzleClient } from '../postgres-database/controller';
 import { mainDatabaseQueryHandler } from '../postgres-database/main-database-handler';
@@ -9,6 +8,7 @@ import { CacheKeyBuilderProps, generateHierarchicalCacheKey, generateHierarchica
 import { cacheHandler } from '../cache/cache-handler.d.js';
 import { D1DatabaseQueryProps } from '../d1-database/queries';
 import { D1DatabaseQueryHandler } from '../d1-database/d1-database-handler';
+import { ErrorDetails, ServiceResponse } from '@base/shared-types';
 
 export default class CoreService extends WorkerEntrypoint<Env> {
 	private app = new Hono<{ Bindings: Env }>();
@@ -26,17 +26,18 @@ export default class CoreService extends WorkerEntrypoint<Env> {
 	private setupRoutes() {
 		this.app.get('/test', async (c) => {
 			try {
-				this.mainDatabaseHandler({
-					type: 'assistants',
+				await this.mainDatabaseHandler({
+					type: 'users',
 					query: {
-						method: 'getAssistants',
+						method: 'createIntegration',
 						data: {
-							id: '',
-							withPersonalities: true,
+							service: 'shopify',
+							code: '',
 						},
 					},
 					userData: {
-						organizationId: '',
+						userId: 'google-oauth2|103923806057449768456',
+						organizationId: 'org_58SqXmTvvx8tmXoO',
 					},
 				});
 			} catch (error) {}

@@ -35,8 +35,4 @@ export const zodJsonConfigurationSchema = z.record(
 export type JsonActionResultsMetadata = Record<any, any>;
 
 // Aqui se aregarian más valores según el tipo de proveedor ej: Twilio tiene los siguientes valores:
-export type JsonConnectionsMetadata = {
-	wabaId: string;
-	accountSid: string;
-	authToken: string;
-};
+export type JsonConnectionsMetadata = {};

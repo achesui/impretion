@@ -1,7 +1,8 @@
-import { ServiceResponse } from "../../../global";
+import { ServiceResponse, UserData } from "@base/shared-types";
 import {
   ChatCompletionProps,
   ChatCompletionsHelpers,
+  DurableObjectSQL,
   UserMessageState,
 } from "../../src/types";
 import { conversationHandler } from "../conversation-handler";
@@ -19,6 +20,8 @@ type ChannelServicesData = {
 };
 
 type ResponseBuilderProps<TAgentContext> = {
+  sql: DurableObjectSQL;
+  userData: UserData;
   source: string;
   channelPayload: ChannelServicesData;
   from: string;
@@ -28,6 +31,10 @@ type ResponseBuilderProps<TAgentContext> = {
     // Si es un objeto son datos que se procesaran de cierto source y se retornara como string, conversationHandler ÚNICAMENTE acepta string.
     assistantMessage: string | Record<string, any>;
   };
+  timestamps: {
+    userMessageTimestamp: Date;
+    assistantMessageTimestamp: Date;
+  };
   stateHelpers: ChatCompletionsHelpers<TAgentContext>;
   model: string;
   env: Env;
@@ -35,16 +42,29 @@ type ResponseBuilderProps<TAgentContext> = {
 
 const model = "openai/gpt-4.1-mini";
 export async function responseBuilder<TAgentContext>({
+  sql,
+  userData,
   source,
   channelPayload,
   from,
   to,
   messages,
+  timestamps,
   stateHelpers,
   model,
   env,
 }: ResponseBuilderProps<TAgentContext>): Promise<
-  ServiceResponse<{ content: string | Record<string, any>; model: string }, any>
+  ServiceResponse<
+    {
+      content: string | Record<string, any>;
+      model: string;
+      timestamps: {
+        userMessageTimestamp: Date;
+        assistantMessageTimestamp: Date;
+      };
+    },
+    any
+  >
 > {
   const { category, data, type, responseMetadata, connectionType } =
     channelPayload;
@@ -70,11 +90,14 @@ export async function responseBuilder<TAgentContext>({
 
       if (!response.success) throw new Error();
 
-      await conversationHandler({
-        state,
-        setState,
+      await conversationHandler<TAgentContext>({
+        sql,
+        userData,
+        stateHelpers,
         userMessage,
         assistantMessage: assistantMessage as string,
+        timestamps,
+        env,
       });
 
       /**
@@ -106,6 +129,7 @@ export async function responseBuilder<TAgentContext>({
           },
         );
 
+        /*
         // Creación del estado de la acción.
         setState({
           ...state,
@@ -120,23 +144,45 @@ export async function responseBuilder<TAgentContext>({
             ],
           },
         });
+         */
       }
 
       return {
         success: true,
-        data: { content: "response.data", model },
+        data: { content: "response.data", model, timestamps },
+      };
+
+    case "chatbot":
+      console.log("respouesta de sitio web =< ", messages);
+
+      await conversationHandler<TAgentContext>({
+        sql,
+        userData,
+        stateHelpers,
+        userMessage,
+        assistantMessage: assistantMessage as string,
+        timestamps,
+        env,
+      });
+
+      return {
+        success: true,
+        data: { content: assistantMessage, model, timestamps },
       };
 
     default:
       await conversationHandler({
-        state,
-        setState,
+        sql,
+        userData,
+        stateHelpers,
         userMessage,
         assistantMessage: assistantMessage as string,
+        timestamps,
+        env,
       });
       return {
         success: true,
-        data: { content: assistantMessage, model },
+        data: { content: assistantMessage, model, timestamps },
       };
   }
 }

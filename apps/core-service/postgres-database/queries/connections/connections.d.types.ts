@@ -16,7 +16,7 @@ import {
 // Tabla: connections
 export type GetConnectionResponse = SelectConnectionSchema;
 export type UpdateConnectionResponse = UpdateConnectionSchema;
-export type CreateConnectionResponse = CreateConnectionSchema;
+export type CreateConnectionResponse = SelectConnectionSchema;
 export type RemoveConnectionResponse = { id: string };
 
 // Tabla: connectionSubscriptions
@@ -51,13 +51,13 @@ export type ConnectionHandlers = {
 		env: Env,
 		db: DrizzleDb,
 		data: CreateConnectionSubscriptionParams,
-		userData: UserData
+		userData: UserData,
 	) => Promise<UpsertConnectionSubscriptionResponse>;
 	removeConnectionSubscription: (
 		env: Env,
 		db: DrizzleDb,
 		data: RemoveConnectionSubscriptionParams,
-		userData: UserData
+		userData: UserData,
 	) => Promise<RemoveConnectionSubscriptionResponse>;
 };
 

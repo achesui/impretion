@@ -244,15 +244,14 @@ const insertIntegrationSchema = createInsertSchema(integrations);
 const selectIntegrationSchema = createSelectSchema(integrations);
 const selectUserSchema = createSelectSchema(users);
 
-// Los parametros necesarios para la creación de una nueva integración, estos datos provienen del cliente (PKCE).
-const availableIntegrations = ['calendly', 'auth0'] as const;
-const integrationCreateSchema = z.object({
-	code: z.string().min(1, 'Code is required'),
-	redirectUri: z.string().min(1, 'Redirect URI is required').optional(),
-	codeVerifier: z.string().min(1, 'Code verifier is required').optional(),
-	clientId: z.string().min(1, 'Client ID is required').optional(),
-	service: z.enum(availableIntegrations),
-});
+// Los parametros necesarios para la creación de una nueva integración, estos datos provienen del cliente, con formatos de seguridad diferentes: (PKCE, HMAC, etc..).
+const availableIntegrations = ['calendly', 'auth0', 'shopify'] as const;
+const createIntegrationSchema = z
+	.object({
+		code: z.string().min(1, 'Code is required'),
+		service: z.enum(availableIntegrations),
+	})
+	.catchall(z.any());
 
 const integrationUpdateSchema = insertIntegrationSchema
 	.pick({
@@ -265,18 +264,6 @@ const integrationUpdateSchema = insertIntegrationSchema
 	})
 	.partial();
 
-export const upsertIntegrationSchema = z.discriminatedUnion('operation', [
-	z.object({
-		operation: z.literal('create'),
-		values: integrationCreateSchema,
-	}),
-	z.object({
-		operation: z.literal('update'),
-		id: z.string().uuid('Invalid integration ID'),
-		values: integrationUpdateSchema,
-	}),
-]);
-
 // Obtiene todos los datos necesarios de la tabla "integrations"
 const getIntegrationDataSchema = selectIntegrationSchema.omit({
 	userId: true,
@@ -284,14 +271,15 @@ const getIntegrationDataSchema = selectIntegrationSchema.omit({
 	accessToken: true,
 	refreshToken: true,
 });
-export type SelectIntegrationSchema = z.infer<typeof getIntegrationDataSchema>;
 
 export const userDataSchema = selectUserSchema.extend({
 	integrations: z.array(selectIntegrationSchema.partial()),
 });
-export type SelectUserDataSchema = z.infer<typeof userDataSchema>;
 
-export type UpsertIntegrationSchema = z.infer<typeof upsertIntegrationSchema>;
+export type SelectUserDataSchema = z.infer<typeof userDataSchema>;
+export type SelectIntegrationSchema = z.infer<typeof getIntegrationDataSchema>;
+export type CreateIntegrationSchema = z.infer<typeof createIntegrationSchema>;
+export type UpdateIntegrationSchema = z.infer<typeof integrationUpdateSchema>;
 
 /* ============ collections ============ */
 

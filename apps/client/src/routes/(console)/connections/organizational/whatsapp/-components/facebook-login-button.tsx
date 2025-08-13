@@ -9,6 +9,8 @@ type FacebookLoginButtonProps = {
     wabaId: string;
     senderId: string;
     assistantId: string;
+    businessName: string;
+    templateId: string;
   }>;
 };
 
@@ -156,7 +158,7 @@ const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
             //featureType: "whatsapp_business_app_onboarding",
             sessionInfoVersion: 3,
           },
-        }
+        },
       );
     } catch (error) {
       console.error("Error calling FB.login:", error);
@@ -227,7 +229,7 @@ const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
 
   const getButtonClasses = () => {
     const baseClasses =
-      "flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed w-full";
+      "flex w-2/4 items-center justify-center gap-2 px-6 py-3 rounded-lg font-medium text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed";
 
     switch (connectionStatus) {
       case "connected":
@@ -242,7 +244,7 @@ const FacebookLoginButton: React.FC<FacebookLoginButtonProps> = ({
   };
 
   return (
-    <div className="w-full space-y-3">
+    <div className="w-full flex flex-col items-center justify-center space-y-3">
       <button
         type="button"
         onClick={handleLoginClick}

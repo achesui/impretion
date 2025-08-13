@@ -20,7 +20,8 @@ const phoneSchema = z.object({
     .string()
     .min(10, "El número debe tener al menos 10 dígitos")
     .regex(/^\+?[\d\s\-\(\)]+$/, "Formato de número inválido")
-    .transform((val) => val.replace(/[\s\-\(\)]/g, "")), // Limpiar formato
+    .trim()
+    .transform((val) => val.replace(/[\s\-\(\)]/g, "")),
 });
 
 const codeSchema = z.object({
@@ -149,7 +150,7 @@ export function NewDirectConnection({
   const onSubmitPhone = (data: PhoneFormData) => {
     setPhoneNumber(data.phone);
     sendCodeMutation.mutate({
-      workerUrl: "http://localhost:3005",
+      workerUrl: "http://localhost:3002",
       route: "/channels/twilio/verification",
       data: {
         to: `+57${data.phone}`,
@@ -159,7 +160,7 @@ export function NewDirectConnection({
 
   const onSubmitCode = (data: CodeFormData) => {
     verifyCodeMutation.mutate({
-      workerUrl: "http://localhost:3005",
+      workerUrl: "http://localhost:3002",
       route: "/channels/twilio/verification-validation",
       data: {
         to: `57${phoneNumber}`,
@@ -209,7 +210,7 @@ export function NewDirectConnection({
     codeForm.reset();
     verifyCodeMutation.reset();
     sendCodeMutation.mutate({
-      workerUrl: "http://localhost:3005",
+      workerUrl: "http://localhost:3002",
       route: "/verification",
       data: {
         to: phoneNumber,

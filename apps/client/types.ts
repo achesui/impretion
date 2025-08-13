@@ -150,3 +150,79 @@ export type ActionSchema = {
     };
   };
 };
+
+//========== INTEGRATIONS ==========
+export interface ServiceConfig {
+  id: string;
+  name: string;
+  displayName: string;
+  logo: string;
+  description: {
+    connected: string;
+    disconnected: string;
+  };
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    gradientFrom: string;
+    gradientTo: string;
+  };
+  clientId?: string;
+  authUrl?: string;
+  tokenUrl?: string;
+  scopes?: string[];
+  additionalFields?: AdditionalField[];
+  metadata?: Record<string, any>;
+  // Configuración específica para cada servicio
+  authConfig: {
+    type: "oauth2" | "custom"; // Tipo de autenticación
+    method: "pkce" | "client_secret" | "hmac"; // Método de seguridad
+    responseType: "code" | "token"; // Tipo de respuesta
+    codeChallenge?: boolean; // Si requiere PKCE
+    state?: boolean; // Si requiere parámetro state
+    customParams?: Record<string, string>; // Parámetros adicionales para la URL de autorización
+  };
+}
+
+export interface AdditionalField {
+  id: string;
+  label: string;
+  placeholder: string;
+  type: "text" | "email" | "url" | "select" | "textarea";
+  required: boolean;
+  validation?: {
+    pattern?: string;
+    message?: string;
+  };
+  options?: { value: string; label: string }[];
+  description?: string;
+}
+
+export interface IntegrationFormData {
+  [key: string]: string | number | boolean;
+}
+
+export interface AuthCallbackParams {
+  code?: string;
+  error?: string;
+  error_description?: string;
+  state?: string;
+  // Parámetros específicos de Shopify
+  hmac?: string;
+  timestamp?: string;
+  shop?: string;
+  // Parámetros adicionales que puedan venir de otros servicios
+  [key: string]: string | undefined;
+}
+
+export interface AuthUrlParams {
+  clientId: string;
+  redirectUri: string;
+  scopes?: string[];
+  state?: string;
+  codeChallenge?: string;
+  codeChallengeMethod?: string;
+  // Parámetros específicos por servicio
+  [key: string]: any;
+}

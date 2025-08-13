@@ -4,7 +4,6 @@ import {
   OpenAIChatCompletionsError,
 } from "../../../../lib/errors";
 import { getDatePart, getDayOfTheWeek, trimIndentation } from "../../../utils";
-import { ServiceResponse } from "../../../../../global";
 import {
   AIGatewayMetadata,
   AppointsmentsConfiguration,
@@ -17,6 +16,7 @@ import {
   getDatabaseScheduledAppointments,
   getSchedules,
 } from "./scheduled-appointments-handler";
+import { ServiceResponse } from "@base/shared-types";
 
 type AppointmentAvailabilityCheckResponse = {
   isBookeable: boolean;
